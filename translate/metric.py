@@ -3,16 +3,6 @@ from nltk.translate.bleu_score import sentence_bleu
 import json
 import nltk
 
-def handleData(jsonpath, input='en', output='vi'):
-    with open(jsonpath, 'r', encoding="utf-8") as f:
-        data = json.load(f)
-
-    results = list()
-    for id in data['vi'].keys():
-        results.append([id, data[input][id], data[output][id]])
-
-    return results
-
 
 def bleuScore(sen1, sen2):
   words1 = sen1.split(' ')
