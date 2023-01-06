@@ -1,5 +1,0 @@
-
-
-
-CHANNEL_ID = "UCsooa4yRKGN_zEE8iknghZA"
-API_KEY = "AIzaSyCylbK00E9Aenh-Z5zskLpH4QPzwEq1XVc"
