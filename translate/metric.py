@@ -2,7 +2,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from nltk.translate.bleu_score import sentence_bleu
 import json
 import nltk
-
+nltk.download('book')
 
 def bleuScore(sen1, sen2):
   words1 = sen1.split(' ')
