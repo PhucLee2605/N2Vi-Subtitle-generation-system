@@ -1,4 +1,5 @@
-from .utils import metric, preprocess
+from .utils import preprocess
+from .utils import metric
 
 
 data = preprocess.handlejsonData("../../data/captionData.json")
