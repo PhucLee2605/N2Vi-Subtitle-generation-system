@@ -53,3 +53,14 @@ def handlejsonData(jsonpath, input='en', output='vi'):
         results.append([id, data[input][id], data[output][id]])
 
     return results
+
+
+def splitSentence(sen, threshold):
+    out = []
+    for chunk in sen.split('. '):
+        if out and len(chunk) + len(out[-1]) < threshold:
+            out[-1] += ' ' + chunk + '.'
+        else:
+            out.append('en: ' + chunk + '.')
+
+    return out
