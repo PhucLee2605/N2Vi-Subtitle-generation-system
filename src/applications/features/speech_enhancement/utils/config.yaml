@@ -1,0 +1,4 @@
+model: ""
+sampling_rate: 22050
+device: "cpu"
+data_path: ""

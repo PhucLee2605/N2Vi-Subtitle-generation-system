@@ -1,0 +1,5 @@
+model_name: "facebook/wav2vec2-large-960h-lv60-self"
+sampling_rate: 22050 # read cảefully which sampling rate model is  trained with
+device: "cpu"
+data_path: "" # for evaluation
+chunk_lenght_s: 10 # in seconds
