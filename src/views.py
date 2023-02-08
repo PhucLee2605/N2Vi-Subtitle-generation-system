@@ -27,15 +27,25 @@ def translate():
 @views.route('/translate', methods=['POST'])
 def upload_audio():
     if request.method == "POST":
-        file = request.files['text_file']
+        if request.files['file-script'].content_length > 0:
+            file = request.files['file-script']
 
-    if file.filename.endswith('.txt'):
-        text = file.read().decode("utf-8")
-    elif file.filename.endswith('.xml'):
-        text = preprocess.extractXml(file.read().decode("utf-8"))
-    else:
-        flash('No file selected for uploading')
-        return(redirect(request.url))
+            if file.filename.endswith('.txt'):
+                text = file.read().decode("utf-8")
+            elif file.filename.endswith('.xml'):
+                text = preprocess.extractXml(file.read().decode("utf-8"))
+            else:
+                flash('No file selected for uploading')
+                return(redirect(request.url))
+
+        elif request.files['file-script'].content_length == 0 and request.form.get('inputNote'):
+            text = request.form.get('inputNote')
+            NOTE = True
+            print('oke')
+
+        else:
+            flash('Content conflict', category='error')
+            return render_template("translate.html")
 
     #Infer
     tok, mod = model.backBone()
@@ -45,7 +55,10 @@ def upload_audio():
     with open(TEMP_TXT_FILE, 'w', encoding="utf-8") as f:
         f.write(result[0][0])
 
-    return render_template("translate.html", relink=f'/download/{TEMP_TXT_FILE}')
+    if NOTE:
+        return render_template("translate.html", relink=f'/download/{TEMP_TXT_FILE}', input=text, content=result[0][0])
+
+    return render_template("/translate", relink=f'/download/{TEMP_TXT_FILE}')
 
 @views.route('/download/<path:filename>')
 def download(filename):

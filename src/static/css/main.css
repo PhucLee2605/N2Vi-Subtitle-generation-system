@@ -2,25 +2,28 @@ body{
   background: rgba(0,0,0,0.9);
 }
 form{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-top: -100px;
-  margin-left: -250px;
-  width: 500px;
-  height: 200px;
-  border: 4px dashed #fff;
+  position: static;
+  top: 15%;
+  left: 15%;
+  /*margin-top: -100px;*/
+  /*margin-left: -250px;*/
+  margin: auto;
+    width: 70%;
+    height: 100px;
+    border: 4px dashed #fff;
 }
 form p{
+    position: static;
   width: 100%;
   height: 100%;
+    margin-top: -90px;
   text-align: center;
-  line-height: 170px;
+  line-height: 100px;
   color: #ffffff;
   font-family: Arial;
 }
-form input{
-  position: absolute;
+form input[type=file]{
+  position: static;
   margin: 0;
   padding: 0;
   width: 100%;
@@ -28,12 +31,22 @@ form input{
   outline: none;
   opacity: 0;
 }
+form input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
 form button{
   margin: 0;
   color: #fff;
   background: #16a085;
   border: none;
-  width: 508px;
+  width: 102%;
   height: 35px;
   margin-top: -20px;
   margin-left: -4px;
@@ -42,6 +55,22 @@ form button{
   transition: all .2s ease;
   outline: none;
 }
+
+form a{
+  color: #fff;
+  background: #10676f;
+  border: none;
+  width: 102%;
+  height: 35px;
+  margin-top: 10px;
+  margin-left: -4px;
+  border-radius: 4px;
+  border-bottom: 4px solid #114e7a;
+  transition: all .2s ease;
+  outline: none;
+    text-align: center;
+    display: block;
+}
 form button:hover{
   background: #149174;
 	color: #0C5645;
@@ -49,3 +78,25 @@ form button:hover{
 form button:active{
   border:0;
 }
+
+form textarea[name="inputNote"]{
+    width: 50%;
+    height: 300px;
+    margin-left: -5px;
+    font-family: Arial, sans-serif;
+    font-size: large;
+    display: inline;
+}
+
+form textarea[name="outputNote"]{
+    width: 50%;
+    height: 300px;
+    margin-left: 1px;
+    font-family: Arial, sans-serif;
+    font-size: large;
+    display: inline;
+    color: black;
+    background-color: #8c8c8c;
+}
+
+
