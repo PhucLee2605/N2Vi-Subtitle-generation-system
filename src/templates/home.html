@@ -1,0 +1,40 @@
+{% extends "index.html" %}
+{% block banner %}
+<section class="banner_main">
+    <div id="banner1" class="carousel slide" data-ride="carousel">
+        <ol class="carousel-indicators">
+            <li data-target="#banner1" data-slide-to="0" class="active"></li>
+            <li data-target="#banner1" data-slide-to="1"></li>
+        </ol>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="container">
+                    <div class="carousel-caption">
+                        <div class="text-bg">
+                            <img src="../static/images/translate.png">
+                            <a class="read_more" href="/translate">Translate</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="container">
+                    <div class="carousel-caption">
+                        <div class="text-bg">
+                            <h1>software</h1>
+                            <span>Maker</span>
+                            <a class="read_more" href="/recognition">Recognize some audio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a class="carousel-control-prev" href="#banner1" role="button" data-slide="prev">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        </a>
+        <a class="carousel-control-next" href="#banner1" role="button" data-slide="next">
+            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        </a>
+    </div>
+</section>
+{% endblock %}
