@@ -1,0 +1,16 @@
+{% extends "index.html" %}
+{% block banner %}
+<section class="banner_main">
+    <form action="/translate" method="post" enctype="multipart/form-data">
+      <input type="file" name="text_file" accept=".txt, .srt, .xml">
+      <p>Drag your files here or click in this area.</p>
+      <button type="submit">Upload</button>
+    </form>
+    {% if relink %}
+        <a id="downText" href="{{ relink }}" target="_blank"></a>
+        <script>
+            document.getElementById('downText').click();
+        </script>
+    {% endif %}
+</section>
+{% endblock %}
