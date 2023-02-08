@@ -1,1 +1,5 @@
 /service/
+__pycache__
+applications\data
+*.json
+*.csv
