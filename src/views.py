@@ -1,5 +1,6 @@
-from flask import request, Blueprint, render_template, flash, redirect, send_file
+from flask import request, Blueprint, render_template, flash, redirect, send_file, session, url_for
 from .applications.features.speech_translation import preprocess, model
+from .applications.features.speech_recognition import recognition
 import os
 import torch
 
@@ -22,7 +23,11 @@ def home():
 
 @views.route('/translate')
 def translate():
-    return render_template("translate.html")
+    try:
+        print('ok')
+        return render_template("translate.html", relink=session.get('downlink'), input=session.get("input"), content=session.get("content"))
+    except:
+        return render_template("translate.html", relink=session.get('downlink'))
 
 @views.route('/translate', methods=['POST'])
 def upload_audio():
@@ -41,7 +46,6 @@ def upload_audio():
         elif request.files['file-script'].content_length == 0 and request.form.get('inputNote'):
             text = request.form.get('inputNote')
             NOTE = True
-            print('oke')
 
         else:
             flash('Content conflict', category='error')
@@ -55,11 +59,18 @@ def upload_audio():
     with open(TEMP_TXT_FILE, 'w', encoding="utf-8") as f:
         f.write(result[0][0])
 
+    session['downlink'] = f'/download/{TEMP_TXT_FILE}'
     if NOTE:
-        return render_template("translate.html", relink=f'/download/{TEMP_TXT_FILE}', input=text, content=result[0][0])
-
-    return render_template("/translate", relink=f'/download/{TEMP_TXT_FILE}')
+        session['input'] = text
+        session['content'] = result[0][0]
+    return redirect("/translate")
 
 @views.route('/download/<path:filename>')
 def download(filename):
     return send_file(filename, as_attachment=True)
+
+
+@views.route('/recognition')
+def recognize():
+    recognition()
+    return "<p>Hello</p>"
