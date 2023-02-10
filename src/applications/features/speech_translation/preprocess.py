@@ -1,7 +1,7 @@
 import os
 import json
 from bs4 import BeautifulSoup
-
+import xml.etree.ElementTree as ET
 
 def getCaption(database, vi=True, en=True):
     capPath = os.path.join(database, 'caption')
@@ -33,12 +33,14 @@ def getCaption(database, vi=True, en=True):
     return captionData
 
 
-def extractXml(data, lang='en'):
-    xmlData = BeautifulSoup(data, "xml")
+def extractXml(path, lang='en'):
+    with open(path, 'r', encoding="utf-8") as f:
+        xmlData = ET.fromstring(f.read())
+
     if lang == 'vi':
-        sentence = ' '.join([text.string.replace('\n', ' ') for text in xmlData.find_all('p')[1:]])
+        sentence = ' '.join([p.text for p in xmlData.findall('.//p')[1:]])
     else:
-        sentence = ' '.join([text.string.replace('\n', ' ') for text in xmlData.find_all('p')])
+        sentence = ' '.join([p.text for p in xmlData.findall('.//p')])
     return sentence
 
 
