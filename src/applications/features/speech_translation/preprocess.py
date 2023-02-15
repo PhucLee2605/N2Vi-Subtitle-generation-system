@@ -1,6 +1,5 @@
 import os
 import json
-from bs4 import BeautifulSoup
 import xml.etree.ElementTree as ET
 
 def getCaption(database, vi=True, en=True):
@@ -65,3 +64,28 @@ def splitSentence(sen, threshold):
             out.append(lang + chunk + '.')
 
     return out
+
+
+def milliseconds_to_time(milliseconds):
+    seconds, milliseconds = divmod(int(milliseconds), 1000)
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    return '{:02d}:{:02d}:{:02d},{:03d}'.format(hours, minutes, seconds, milliseconds)
+
+def xml_to_srt(xml_data, srt_file):
+    tree = ET.ElementTree(ET.fromstring(xml_data))
+    root = tree.getroot()
+
+    with open(srt_file, 'w', encoding="utf-8") as f:
+        count = 1
+        for subtitle in root.findall('.//p'):
+            start = int(subtitle.get('t'))
+            end = int(subtitle.get('d')) + start
+            text = subtitle.text
+
+            f.write(str(count) + '\n')
+            f.write(milliseconds_to_time(start) + ' --> ' + milliseconds_to_time(end) + '\n')
+            f.write(text + '\n\n')
+
+            count += 1
+

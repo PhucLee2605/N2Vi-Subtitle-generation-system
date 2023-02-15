@@ -12,34 +12,42 @@ def backBone(device='cpu'):
 
 
 
-def infer(data, tokenizer, model, max_length, device='cpu'):
+def infer(texts, tokenizer, model, max_length, format='text', device='cpu'):
     predictions = list()
-    for key, input, output in data:
-        print(f"Start predict {key}")
-        document = list()
-        paragraphs = re.sub(r'(\n\s*){2,}', r'\n\n', input).split('\n')
 
-        for para in paragraphs:
-            if para == "":
-                document.append("")
-                continue
-            if para[:3] != 'en:' and para[:3] != 'vi:':
-                para = paragraphs[0][:3] + ' ' + para
+    if format == 'text':
+        for text in texts:
+            print(f"Start predict")
+            document = list()
+            paragraphs = re.sub(r'(\n\s*){2,}', r'\n\n', text).split('\n')
 
-            token_input = tokenizer(para, return_tensors="pt", padding=True).input_ids.to(device)
-            decode_input = tokenizer.batch_decode(token_input, skip_special_tokens=True)[0]
+            for para in paragraphs:
+                if para == "":
+                    document.append("")
+                    continue
+                if para[:3] != 'en:' and para[:3] != 'vi:':
+                    para = paragraphs[0][:3] + ' ' + para
 
-            sentences = re.sub(' +', ' ', decode_input.strip())
+                token_input = tokenizer(para, return_tensors="pt", padding=True).input_ids.to(device)
+                decode_input = tokenizer.batch_decode(token_input, skip_special_tokens=True)[0]
 
-            lstSen = splitSentence(sentences, 256)
-            tok = tokenizer(lstSen, return_tensors="pt", padding=True).input_ids.to(device)
-            result = model.generate(tok, max_length=max_length)
-            result = tokenizer.batch_decode(result, skip_special_tokens=True)
+                sentences = re.sub(' +', ' ', decode_input.strip())
 
-            pred = '. '.join([chunk[4:] for chunk in result])
+                lstSen = splitSentence(sentences, 256)
+                tok = tokenizer(lstSen, return_tensors="pt", padding=True).input_ids.to(device)
+                result = model.generate(tok, max_length=max_length)
+                result = tokenizer.batch_decode(result, skip_special_tokens=True)
 
-            document.append(pred)
+                pred = '. '.join([chunk[4:] for chunk in result])
 
-        predictions.append(['\n'.join(document), output])
+                document.append(pred)
+
+            predictions.append('\n'.join(document))
+
+    else:
+        tok = tokenizer(texts, return_tensors="pt", padding=True).input_ids.to(device)
+        result = model.generate(tok, max_length=max_length, max_time=10., no_repeat_ngram_size=5, )
+        predictions = tokenizer.batch_decode(result, skip_special_tokens=True)
+
 
     return predictions
