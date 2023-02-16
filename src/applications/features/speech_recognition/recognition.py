@@ -1,25 +1,46 @@
-from utils.model import enhance_pipeline
-from utils.preprocess import map_to_array
+from .utils.model import enhance_pipeline
+from .utils.preprocess import map_to_array
+from .utils.util import cfg
 import torch
 import config_with_yaml as config
 import os
+from typing import Any, Union
 import argparse
+import librosa as ls
 
-cfg = config.load(r"utils/config.yaml")
 chunk_length = cfg.getProperty("chunk_lenght_s")
 
 
-def speech_recognize(audio_file: str):
-    assert os.path.isfile(audio_file), f"{audio_file} not exists"
-    ds = map_to_array({
-        "file": audio_file
-    })
+def speech_recognize(audio: Union[str,Any]):
+    """Do speech recognition and return both raw text and words with timestamps
+
+    Args:
+        audio (Union[str,Any]): can be file's name or audio loaded by librosa (mono)
+
+    Returns:
+        _type_: {"text": "raw text from recognition",
+                "chunk": [
+                            {"text": "word1", "timestamps": (start, end)},
+                            {"text": "word2", "timestamps": (start, end)},
+                            ...
+                        ]        
+                }
+    """
+    ds = dict()
+    try:
+        assert os.path.isfile(audio)
+        ds = map_to_array({
+            "file": audio
+        })
+    except AssertionError:
+        ds["speech"] = audio
 
     with torch.no_grad():
         transcription = enhance_pipeline()(
-            ds["speech"], chunk_length_s=chunk_length)["text"]
+            ds["speech"], chunk_length_s=chunk_length)
 
     return transcription
+
 
 #TODO: test
 if __name__ == '__main__':

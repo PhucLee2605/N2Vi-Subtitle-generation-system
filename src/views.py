@@ -1,5 +1,6 @@
 from flask import request, Blueprint, render_template, flash, redirect, send_file
 from .applications.features.speech_translation import preprocess, model
+from .applications.features.speech_recognition.recognition import speech_recognize
 import os
 import torch
 
@@ -50,3 +51,10 @@ def upload_audio():
 @views.route('/download/<path:filename>')
 def download(filename):
     return send_file(filename, as_attachment=True)
+
+
+@views.route('/recognition')
+def recognize():
+    speech_recognize()
+    return "adfasdf"
+
