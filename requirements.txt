@@ -10,3 +10,7 @@ librosa
 datasets
 evaluate
 jiwer
+bs4
+denoiser
+sklearn
+flask

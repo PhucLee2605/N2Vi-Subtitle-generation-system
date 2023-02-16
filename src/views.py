@@ -1,6 +1,6 @@
 from flask import request, Blueprint, render_template, flash, redirect, send_file, jsonify
 from .applications.features.speech_translation import preprocess, model
-from .applications.features.speech_recognition import recognition
+from .applications.features.speech_recognition.recognition import speech_recognize
 import xml.etree.ElementTree as ET
 import os
 import torch
