@@ -34,7 +34,6 @@
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
-
 </head>
 <body class="main-layout">
     <div class="loader_bg">
@@ -80,12 +79,7 @@
             </div>
         </div>
     </header>
-
     {% block banner %}{% endblock %}
-
-    {% block content %}{% endblock %}
-
-
 
 
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
@@ -104,5 +98,6 @@
             document.getElementById("mySidepanel").style.width = "0";
         }
     </script>
+    {% block readtext %}{% endblock %}
 </body>
 </html>

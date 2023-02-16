@@ -1,5 +1,5 @@
 from nltk.translate.bleu_score import sentence_bleu
-from model import backBone, infer
+from .model import backBone, infer
 import torch
 
 

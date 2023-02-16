@@ -1,16 +1,120 @@
 {% extends "index.html" %}
+
+
 {% block banner %}
-<section class="banner_main">
-    <form action="/translate" method="post" enctype="multipart/form-data">
-      <input type="file" name="text_file" accept=".txt, .srt, .xml">
-      <p>Drag your files here or click in this area.</p>
-      <button type="submit">Upload</button>
-    </form>
-    {% if relink %}
-        <a id="downText" href="{{ relink }}" target="_blank"></a>
-        <script>
-            document.getElementById('downText').click();
-        </script>
-    {% endif %}
+<section class="banner_main" xmlns="http://www.w3.org/1999/html" onload="checkFileAPI();">
+    <div>
+        <form action="/translated" method="post" enctype="multipart/form-data" name="form-translation">
+            <input id="upload_file" onchange="readText(this)" type="file" name="file-script" accept=".txt, .xml">
+            <p>Drag your files here or click in this area.</p>
+            <br>
+            <div>
+                <textarea id="inNoteCon" name="inputNote" placeholder="Translate script"></textarea>
+                <input type="text" id="file-name" hidden>
+                <textarea id="outNoteCon" name="outputNote" readonly></textarea>
+            </div>
+            <a id="translate_button" class="translate" href="javascript:translate('#inNoteCon',
+                                '#outNoteCon',
+                                '#txtpath',
+                                '#xmlpath',
+                                '#srtpath',
+                                '#file-name');">Translate</a>
+            <img id="loading-image" src="{{ url_for('static', filename='loading.gif') }}" hidden>
+            <a id="txtpath">Download TXT</a>
+            <a id="xmlpath">Download XML</a>
+            <a id="srtpath">Download SRT</a>
+
+        </form>
+    </div>
+
 </section>
+{% endblock %}
+
+{% block readtext %}
+<script type="text/javascript">
+    var reader = new FileReader(); //GLOBAL File Reader object for demo purpose only
+
+    /**
+     * Check for the various File API support.
+     */
+    function checkFileAPI() {
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            reader = new FileReader();
+            return true;
+        } else {
+            alert('The File APIs are not fully supported by your browser. Fallback required.');
+            return false;
+        }
+    }
+
+    /**
+     * read text input
+     */
+    function readText(filePath) {
+        // var filename = filePath.replace(/^.*[\\\/]/, '')
+        var fileName = filePath.files[0].name;
+        var output = ""; //placeholder for text output
+        if(filePath.files && filePath.files[0]) {
+            reader.onload = function (e) {
+                output = e.target.result;
+                displayContents(output, fileName);
+            };//end onload()
+            reader.readAsText(filePath.files[0]);
+        }//end if html5 filelist support
+        else if(ActiveXObject && filePath) { //fallback to IE 6-8 support via ActiveX
+            try {
+                reader = new ActiveXObject("Scripting.FileSystemObject");
+                var file = reader.OpenTextFile(filePath, 1); //ActiveX File Object
+                output = file.ReadAll(); //text contents of file
+                file.Close(); //close file "input stream"
+                displayContents(output, fileName);
+            } catch (e) {
+                if (e.number == -2146827859) {
+                    alert('Unable to access local files due to browser security settings. ' +
+                     'To overcome this, go to Tools->Internet Options->Security->Custom Level. ' +
+                     'Find the setting for "Initialize and script ActiveX controls not marked as safe" and change it to "Enable" or "Prompt"');
+                }
+            }
+        }
+        else { //this is where you could fallback to Java Applet, Flash or similar
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * display content using a basic HTML replacement
+     */
+    function displayContents(txt, filename) {
+
+        document.getElementById('inNoteCon').value = txt;
+        document.getElementById('file-name').value = filename;
+         //display output in DOM
+        document.getElementById('upload_file').value = null;
+    };
+
+</script>
+<script>
+    function translate(sourceElem, destElem, txtId, xmlId, srtId, name) {
+            $.post('/translated', {
+                text: $(sourceElem).val(),
+                name: $(name).val()
+            }).done(function(response) {
+                $(destElem).val(response['text'])
+                $(txtId).attr("href", response['txt_href'])
+                $(txtId).attr("target", "_blank")
+                if (response['xml_href']){
+                    $(xmlId).attr("href", response['xml_href'])
+                    $(xmlId).attr("target", "_blank")
+                    $(srtId).attr("href", response['srt_href'])
+                    $(srtId).attr("target", "_blank")
+                }
+            }).fail(function() {
+                $(destElem).text("Could not contact server");
+            });
+        }
+
+</script>
+
+
 {% endblock %}
