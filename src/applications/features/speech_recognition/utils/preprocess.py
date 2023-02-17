@@ -6,3 +6,7 @@ def map_to_array(batch):
     batch["speech"] = speech
     batch["sampling rate"] = sr
     return batch
+
+#TODO: add speech enhancement as preprocess
+def enhance_speech():
+    ...

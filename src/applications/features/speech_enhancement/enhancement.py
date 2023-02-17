@@ -7,7 +7,7 @@ from denoiser.dsp import convert_audio
 from .utils.util import cfg
 from .utils.model import denoise_model
 
-
+#TODO: add enhance for already loaded audio
 def enhance_speech(audio_file: str, model: Literal["dns48", "dns64", "master64"]) -> Union[Any, int]:
     """This funciton enhance speech
 

@@ -1,8 +1,7 @@
 from .utils.model import enhance_pipeline
 from .utils.preprocess import map_to_array
-from .utils.util import cfg
+from .utils.util import cfg, export_xml
 import torch
-import config_with_yaml as config
 import os
 from typing import Any, Union
 import argparse
@@ -11,7 +10,7 @@ import librosa as ls
 chunk_length = cfg.getProperty("chunk_lenght_s")
 
 
-def speech_recognize(audio: Union[str,Any]):
+def speech_recognize(audio: Union[str, Any]):
     """Do speech recognition and return both raw text and words with timestamps
 
     Args:
@@ -38,6 +37,7 @@ def speech_recognize(audio: Union[str,Any]):
     with torch.no_grad():
         transcription = enhance_pipeline()(
             ds["speech"], chunk_length_s=chunk_length)
+    export_xml(transcription)
 
     return transcription
 
