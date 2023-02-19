@@ -2,33 +2,53 @@ import torch
 import os
 import argparse
 import torchaudio
+from pymediainfo import MediaInfo
 from typing import Any, Union, Literal
 from denoiser.dsp import convert_audio
-from .utils.util import cfg
+from .utils.util import cfg, model as enhance_model, DEVICE
 from .utils.model import denoise_model
+from .utils.preprocess import extract_audio_from_video
 
 
-def enhance_speech(audio_file: str, model: Literal["dns48", "dns64", "master64"]) -> Union[Any, int]:
+# TODO: add enhance for already loaded audio
+def enhance_speech(audio_file: Union[str, Any], model: Union[Literal["dns48", "dns64", "master64"], Any] = None) -> Union[Any, int]:
     """This funciton enhance speech
 
     Args:
         audio_file (str): audio's path to be enhanced
-        model (Any): type of pretrained model ("dns48", "dns64", "master64")
+        model (Any): type of pretrained model ("dns48", "dns64", "master64"). Already loaded DNS64, specify if want to use another
 
     Returns:
         Union[Any, int]: return enhanced speecch in the form of torch.Tensor and its sampling rate 
     """
-    assert os.path.exists(audio_file), f"{audio_file} not exists"
-    model = denoise_model(model)
-    enhanced_audio, sr = torchaudio.load(audio_file)
-    enhanced_audio = convert_audio(
-        enhanced_audio.to(), sr, model.sample_rate, model.chin)
+    if isinstance(model, str):
+        model = denoise_model(model)
+    else:
+        model = enhance_model
+    model = model.to(DEVICE)
+    try:
+        assert os.path.isfile(audio_file)
+        fileInfo = MediaInfo.parse(audio_file)
+        for track in fileInfo.tracks:
+            if track.track_type == "Video":
+                enhanced_audio, sr = extract_audio_from_video(audio_file)
+            elif track.track_type == "Audio":
+                enhanced_audio, sr = torchaudio.load(audio_file)
+    except (AssertionError, TypeError):
+        enhanced_audio = audio_file
+        sr = 22500
+
+    enhanced_audio = convert_audio(wav=enhanced_audio.to(DEVICE), 
+                                   from_samplerate=sr, 
+                                   to_samplerate=model.sample_rate, 
+                                   channels=model.chin)
 
     with torch.no_grad():
         denoised = model(enhanced_audio[None])[0]
         denoised = torch.mean(denoised, dim=0, keepdim=True)
+
     print("[INFO] Finished speech enhancement")
-    return denoised
+    return denoised, sr
 
 
 if __name__ == '__main__':

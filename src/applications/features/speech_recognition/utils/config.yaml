@@ -5,3 +5,4 @@ audio_path: "/mnt/c/Users/ASUS/Documents/Capstone project sp23/audio" # for eval
 caption_path: "../../data/captionData.json"
 caption_json: True
 chunk_lenght_s: 10 # in seconds
+output_dir: "applications/data/output"

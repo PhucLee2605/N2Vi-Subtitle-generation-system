@@ -1,22 +1,25 @@
+import sys
+import os
+sys.path.insert(0, f'{os.path.dirname(__file__)}/..')
+import torch
+import argparse
+from typing import Any, Union, Literal
+
+from speech_enhancement.enhancement import enhance_speech
 from .utils.model import enhance_pipeline
 from .utils.preprocess import map_to_array
-from .utils.util import cfg
-import torch
-import config_with_yaml as config
-import os
-from typing import Any, Union
-import argparse
-import librosa as ls
+from .utils.util import cfg, export_xml, model
+
 
 chunk_length = cfg.getProperty("chunk_lenght_s")
 
 
-def speech_recognize(audio: Union[str,Any]):
+def speech_recognize(audio: Union[str, Any], enhance:bool = True, lang: Literal["vi", "en"] = "en") -> dict:
     """Do speech recognition and return both raw text and words with timestamps
 
     Args:
         audio (Union[str,Any]): can be file's name or audio loaded by librosa (mono)
-
+        enhance (boll): set to True to enhance speech before pass into recognition model (set to False if already enhanced or speech's quality is good)
     Returns:
         _type_: {"text": "raw text from recognition",
                 "chunk": [
@@ -35,10 +38,14 @@ def speech_recognize(audio: Union[str,Any]):
     except AssertionError:
         ds["speech"] = audio
 
-    with torch.no_grad():
-        transcription = enhance_pipeline()(
-            ds["speech"], chunk_length_s=chunk_length)
+    if enhance:
+        ds["speech"] = enhance_speech(ds["speech"])
 
+    with torch.no_grad():
+        transcription = model(ds["speech"], chunk_length_s=chunk_length)
+    export_xml(transcription)
+
+    print("[INFO] Finished speech recognition")
     return transcription
 
 
@@ -48,6 +55,3 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--file", required=True,
                         help="file for recognize speech")
     args = parser.parse_args()
-    audio_file = args.file
-
-    print(f"Result of speech recognition:\n\"{speech_recognize(audio_file)}\"")
