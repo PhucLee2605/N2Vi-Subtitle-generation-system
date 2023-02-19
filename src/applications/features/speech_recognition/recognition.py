@@ -39,7 +39,9 @@ def speech_recognize(audio: Union[str, Any], enhance:bool = True, lang: Literal[
         ds["speech"] = audio
 
     if enhance:
-        ds["speech"] = enhance_speech(ds["speech"])
+        ds["speech"], sr = enhance_speech(ds["speech"])
+    
+    ds["speech"] = ds["speech"].squeeze().cpu().detach().numpy()
 
     with torch.no_grad():
         transcription = model(ds["speech"], chunk_length_s=chunk_length)
