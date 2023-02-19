@@ -14,3 +14,7 @@ bs4
 denoiser
 sklearn
 flask
+moviepy
+ffmpeg
+imageio==2.4.1
+pymediainfo
