@@ -1,15 +1,18 @@
 import os
 import time
 import json
+import string
 from tqdm import tqdm
 # import torchaudio
 from typing import Union, Any
 from pymediainfo import MediaInfo
+import warnings
+warnings.filterwarnings("ignore")
 
 from .features.speech_enhancement.utils.preprocess import extract_audio_from_video
 from .features.speech_enhancement.enhancement import enhance_speech
 from .features.speech_recognition.recognition import speech_recognize
-from .features.speech_recognition.utils.metrics import cal_average_WER
+from .features.speech_recognition.utils.metrics import cal_average_WER,cal_single_WER
 
 
 def measure_time_exc_enhance(enhance_file: str, func, **kargs):
@@ -45,10 +48,13 @@ def eval_speech_recog(eval_data_dir: str, gt_value_file: str, lang: str, enh: bo
     with open(gt_value_file, "r") as f:
         gt_values = json.load(f)
         for file in tqdm(os.listdir(eval_data_dir)):
-            preds.append(speech_recognize(os.path.join(eval_data_dir[:-1], file), 
-                                          enhance=enh, 
-                                          lang=lang)["text"])
-            gts.append(gt_values[lang][os.path.splitext(file)[0]])
+            pred = speech_recognize(os.path.join(eval_data_dir[:-1], file),
+                                    enhance=enh,
+                                    lang=lang)["text"].lower().translate(str.maketrans('', '', string.punctuation))
+            gt = gt_values[lang][os.path.splitext(file)[0]].lower().translate(str.maketrans('', '', string.punctuation))
+            print(f"[EVAL] WER: {cal_single_WER(prediction=[pred], reference=[gt])}")
+            preds.append(pred)
+            gts.append(gt)
 
         avg_wer = cal_average_WER(predictions=preds, references=gts)
 
@@ -70,7 +76,7 @@ def eval():
 
 
 if __name__ == '__main__':
-    eval_speech_recog(eval_data_dir="/mnt/c/Users/ASUS/OneDrive/Documents/Capstone project sp23/audio/",
+    eval_speech_recog(eval_data_dir="/content/drive/MyDrive/AI Capstone Project - SP23/data/audio/",
                       gt_value_file="applications/data/captionData.json",
                       lang="en",
                       enh=True)
