@@ -1,6 +1,7 @@
 from flask import request, Blueprint, render_template, flash, redirect, send_file, jsonify
 from .applications.features.speech_translation import preprocess, model
-from .applications.features.speech_recognition.recognition import speech_recognize
+from .applications.features.speech_recognition import recognition
+from .applications.features.speech_enhancement import enhancement
 import xml.etree.ElementTree as ET
 import os
 import torch
@@ -86,6 +87,58 @@ def run_translate():
         return jsonify({"text": result,
                         "txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}'})
 
+
+
+@views.route('/recognize')
+def recognize():
+    return render_template('recognize.html')
+
+@views.route('/recognized', methods=['POST'])
+def run_recognized():
+    print('Recognize')
+    if request.method == 'POST':
+        try:
+            raw_audio = request.files.get('audio')
+        except:
+            flash('No file')
+            return redirect('/recognize')
+
+
+        if raw_audio:
+            print('Done receive')
+            audio_name = ''.join(raw_audio.filename.split('.')[:-1])
+
+            audio_temp_dir = f'{pretemp}/database/audio/temp_{raw_audio.filename}'
+            raw_audio.save(audio_temp_dir)
+
+            ds = recognition.map_to_array({
+                'file': audio_temp_dir
+            })
+
+            ds["speech"], sr = enhancement.enhance_speech(ds['speech'])
+
+            ds["speech"] = ds["speech"].squeeze().cpu().detach().numpy()
+
+            with torch.no_grad():
+                transcription = recognition.model(ds["speech"], chunk_length_s=recognition.chunk_length)
+
+
+            txt_audio_output = f"{pretemp}/database/text/recognized/{audio_name}.txt"
+
+            with open(txt_audio_output, 'w', encoding="utf-8") as f:
+                f.write(transcription['text'])
+
+            xml_audio_output = f'{pretemp}/database/xml/recognized/{audio_name}.xml'
+            with open(xml_audio_output, 'w', encoding="utf-8") as f:
+                xml_data = recognition.export_xml(transcription)
+                f.write(xml_data)
+
+            return jsonify({"text": transcription['text'],
+                            "txt_href": f'/download/{txt_audio_output}',
+                            "xml_href": f'/download/{xml_audio_output}'})
+
+        else:
+            return redirect('/recognize')
 
 @views.route('/download/<path:filename>')
 def download(filename):
