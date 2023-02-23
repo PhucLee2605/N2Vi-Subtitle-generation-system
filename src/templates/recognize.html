@@ -1,0 +1,131 @@
+{% extends "index.html" %}
+
+
+{% block banner %}
+<section class="banner_main" xmlns="http://www.w3.org/1999/html">
+    <div>
+        <form action="/recognized" method="post" enctype="multipart/form-data" name="audio-recognition">
+            <input id="upload_audio" type="file" name="audio-file" accept=".mp3, .m4a, .mp4, .wav">
+            <p>Drag your audio file here or click in this area.</p>
+            <br>
+            <a id="recognize_button" class="start-bar" href="javascript:recognize('#upload_audio',
+                                '#reg-output',
+                                '#txtpath',
+                                '#xmlpath');">Recognized</a>
+            <br>
+            <textarea id="reg-output" name="audio-output" placeholder="Output script: " readonly></textarea>
+
+            <a id="txtpath">Download TXT</a>
+            <a id="xmlpath">Download XML</a>
+        </form>
+<!--        <button id="start-record-audio">Start</button>-->
+<!--        <button id="stop-record-audio">Stop</button>-->
+<!--        <audio id="audio-play" controls></audio>-->
+    </div>
+</section>
+
+
+{% endblock %}
+
+
+{% block jscode %}
+
+<!--<script>-->
+<!--    console.log('hello');-->
+<!--    let audioIN = {audio: true};-->
+
+<!--    navigator.mediaDevices.getUserMedia(audioIN)-->
+
+<!--        .then(function (mediaStreamObj) {-->
+
+<!--            let audio = document.querySelector('audio');-->
+
+<!--            if ("srcObject" in audio) {-->
+<!--                audio.srcObject = mediaStreamObj;-->
+<!--            } else {-->
+<!--                audio.src = window.URL-->
+<!--                    .createObjectURL(mediaStreamObj);-->
+<!--            }-->
+
+<!--            audio.onloadedmetadata = function (ev) {-->
+
+<!--                audio.play();-->
+<!--            };-->
+
+<!--            let start = document.getElementById('start-record-audio');-->
+
+<!--            let stop = document.getElementById('stop-record-audio');-->
+
+<!--            let playAudio = document.getElementById('audio-play');-->
+
+<!--            let mediaRecorder = new MediaRecorder(mediaStreamObj);-->
+
+<!--            start.addEventListener('click', function (ev) {-->
+<!--                mediaRecorder.start();-->
+<!--            })-->
+
+<!--            stop.addEventListener('click', function (ev) {-->
+<!--                mediaRecorder.stop();-->
+<!--            });-->
+
+
+<!--            mediaRecorder.ondataavailable = function (ev) {-->
+<!--                dataArray.push(ev.data);-->
+<!--            }-->
+
+<!--            let dataArray = [];-->
+
+
+<!--            mediaRecorder.onstop = function (ev) {-->
+
+<!--                let audioData = new Blob(dataArray,-->
+<!--                    {'type': 'audio/mp3;'});-->
+<!--                dataArray = [];-->
+<!--                let audioSrc = window.URL-->
+<!--                    .createObjectURL(audioData);-->
+
+<!--                playAudio.src = audioSrc;-->
+<!--            }-->
+<!--        })-->
+
+<!--        .catch(function (err) {-->
+<!--            console.log(err.name, err.message);-->
+<!--        });-->
+<!--</script>-->
+<script>
+    function recognize(sourceElem, destElem, txtId, xmlId) {
+            // $.post('/recognized', {
+            //     file: $(sourceElem).prop('files')
+            // }).done(function(response) {
+            //     $(destElem).val(response['text'])
+            //     $(txtId).attr("href", response['txt_href'])
+            //     $(txtId).attr("target", "_blank")
+            //     $(xmlId).attr("href", response['xml_href'])
+            //     $(xmlId).attr("target", "_blank")
+            // }).fail(function() {
+            //     $(destElem).text("Could not contact server");
+            // });
+
+            var audio = $(sourceElem).prop('files')[0];
+            var formData = new FormData();
+            formData.append('audio', audio)
+
+            $.ajax({
+                url: '/recognized',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $(destElem).val(response['text'])
+                    $(txtId).attr("href", response['txt_href'])
+                    $(txtId).attr("target", "_blank")
+                    $(xmlId).attr("href", response['xml_href'])
+                    $(xmlId).attr("target", "_blank")
+                }
+        // }
+            })
+        }
+
+</script>
+{% endblock %}
