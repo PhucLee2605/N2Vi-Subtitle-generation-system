@@ -11,8 +11,9 @@ if cfg.getProperty("device"):
     DEVICE = cfg.getProperty("device")
 else:
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-model = enhance_pipeline(cfg.getProperty("model_name"))
+print("[INFO] Loading recognition models")
+model_en = enhance_pipeline(cfg.getProperty("en_model_name")) if cfg.getProperty("en_model_name") else None
+model_vi = enhance_pipeline(cfg.getProperty("vi_model_name")) if cfg.getProperty("vi_model_name") else None
 
 
 def export_xml(data: Dict):

@@ -1,5 +1,6 @@
 /service/
 __pycache__
+*.pyc
 applications\data
 *.json
 *.csv

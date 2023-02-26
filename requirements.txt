@@ -6,7 +6,7 @@ torchaudio
 torchtext
 #torchvision==0.8.2+cu110
 tqdm
-librosa
+librosa==0.9.2
 datasets
 evaluate
 jiwer

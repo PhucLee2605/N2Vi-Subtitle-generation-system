@@ -11,11 +11,11 @@ from .utils.preprocess import extract_audio_from_video
 
 
 # TODO: add enhance for already loaded audio
-def enhance_speech(audio_file: Union[str, Any], model: Union[Literal["dns48", "dns64", "master64"], Any] = None) -> Union[Any, int]:
+def enhance_speech(audio_file: Union[str, Any], sampling_rate: int = 22500, model: Union[Literal["dns48", "dns64", "master64"], Any] = None) -> Union[Any, int]:
     """This funciton enhance speech
 
     Args:
-        audio_file (str): audio's path to be enhanced
+        audio_file (str, Any): audio's path or loaded ( to be enhanced
         model (Any): type of pretrained model ("dns48", "dns64", "master64"). Already loaded DNS64, specify if want to use another
 
     Returns:
@@ -36,8 +36,8 @@ def enhance_speech(audio_file: Union[str, Any], model: Union[Literal["dns48", "d
                 enhanced_audio, sr = torchaudio.load(audio_file)
     except (AssertionError, TypeError):
         enhanced_audio = audio_file
-        sr = 22500
-
+        sr = sampling_rate
+        
     enhanced_audio = convert_audio(wav=enhanced_audio.to(DEVICE), 
                                    from_samplerate=sr, 
                                    to_samplerate=model.sample_rate, 

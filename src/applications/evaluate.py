@@ -12,10 +12,11 @@ warnings.filterwarnings("ignore")
 from .features.speech_enhancement.utils.preprocess import extract_audio_from_video
 from .features.speech_enhancement.enhancement import enhance_speech
 from .features.speech_recognition.recognition import speech_recognize
+from .features.speech_recognition.utils.preprocess import load_audio_file
 from .features.speech_recognition.utils.metrics import cal_average_WER,cal_single_WER
 
 
-def measure_time_exc_enhance(enhance_file: str, func, **kargs):
+def measure_time_exc(enhance_file: str, func, **kargs):
     print(f"Measuring {func.__name__} module...")
     st = time.time()
     try:
@@ -67,16 +68,24 @@ def eval_speech_recog(eval_data_dir: str, gt_value_file: str, lang: str, enh: bo
 
 def eval():
     mp3_file = r"/mnt/c/Users/ASUS/Downloads/8191233944245651258.mp4"
-    speech_enhanced = enhance_speech(enhance_file=mp3_file)
-    speech_recog = speech_recognize(
-        speech_enhanced.squeeze(0).cpu().detach().numpy(), False)
-    # speech_recog = speech_recognize(mp3_file)
+    # speech_enhanced = enhance_speech(enhance_file=mp3_file)
+    # speech_recog = speech_recognize(
+    #     speech_enhanced.squeeze(0).cpu().detach().numpy(), False)
+    # root = "/mnt/c/Users/ASUS/OneDrive/Documents/Capstone project sp23/audio"
+    # for mp3_file in ["000.mp3"]:#,'006.mp4','002.mp4']:
+    ds = load_audio_file({
+        # "file": os.path.join(root, mp3_file)
+        'file': mp3_file
+    })
+    print(ds['speech'].size)
+    speech_recog = enhance_speech(ds["speech"],ds["sampling rate"])#, enhance=False)
 
     print(speech_recog)
 
 
 if __name__ == '__main__':
-    eval_speech_recog(eval_data_dir="/content/drive/MyDrive/AI Capstone Project - SP23/data/audio/",
-                      gt_value_file="applications/data/captionData.json",
-                      lang="en",
-                      enh=True)
+    # eval_speech_recog(eval_data_dir="/mnt/c/Users/ASUS/OneDrive/Documents/Capstone project sp23/audio/",
+    #                   gt_value_file="applications/data/captionData.json",
+    #                   lang="en",
+    #                   enh=True)
+    eval()
