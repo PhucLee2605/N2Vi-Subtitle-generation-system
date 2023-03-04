@@ -1,0 +1,9 @@
+en_model_name: "facebook/wav2vec2-large-960h"
+vi_model_name: ""
+sampling_rate: 22050 # read cảefully which sampling rate model is  trained with
+device: "cpu"
+audio_path: "/mnt/c/Users/ASUS/Documents/Capstone project sp23/audio" # for evaluation
+caption_path: "../../data/captionData.json"
+caption_json: True
+chunk_lenght_s: 10 # in seconds
+output_dir: "applications/data/output"
