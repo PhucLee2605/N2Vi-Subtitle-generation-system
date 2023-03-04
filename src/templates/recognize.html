@@ -11,12 +11,14 @@
             <a id="recognize_button" class="start-bar" href="javascript:recognize('#upload_audio',
                                 '#reg-output',
                                 '#txtpath',
-                                '#xmlpath');">Recognized</a>
+                                '#xmlpath',
+                                '#srtpath');">Recognized</a>
             <br>
             <textarea id="reg-output" name="audio-output" placeholder="Output script: " readonly></textarea>
 
             <a id="txtpath">Download TXT</a>
             <a id="xmlpath">Download XML</a>
+            <a id="srtpath">Download SRT</a>
         </form>
 <!--        <button id="start-record-audio">Start</button>-->
 <!--        <button id="stop-record-audio">Stop</button>-->
@@ -93,19 +95,7 @@
 <!--        });-->
 <!--</script>-->
 <script>
-    function recognize(sourceElem, destElem, txtId, xmlId) {
-            // $.post('/recognized', {
-            //     file: $(sourceElem).prop('files')
-            // }).done(function(response) {
-            //     $(destElem).val(response['text'])
-            //     $(txtId).attr("href", response['txt_href'])
-            //     $(txtId).attr("target", "_blank")
-            //     $(xmlId).attr("href", response['xml_href'])
-            //     $(xmlId).attr("target", "_blank")
-            // }).fail(function() {
-            //     $(destElem).text("Could not contact server");
-            // });
-
+    function recognize(sourceElem, destElem, txtId, xmlId, srtId) {
             var audio = $(sourceElem).prop('files')[0];
             var formData = new FormData();
             formData.append('audio', audio)
@@ -122,8 +112,9 @@
                     $(txtId).attr("target", "_blank")
                     $(xmlId).attr("href", response['xml_href'])
                     $(xmlId).attr("target", "_blank")
+                    $(srtId).attr("href", response['srt_href'])
+                    $(srtId).attr("target", "_blank")
                 }
-        // }
             })
         }
 

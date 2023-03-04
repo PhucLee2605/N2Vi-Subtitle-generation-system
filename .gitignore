@@ -4,3 +4,4 @@ __pycache__
 applications\data
 *.json
 *.csv
+/SubtitlesForYoutube/

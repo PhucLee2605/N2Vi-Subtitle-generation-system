@@ -3,18 +3,14 @@ import time
 import json
 import string
 from tqdm import tqdm
-# import torchaudio
-from typing import Union, Any
 from pymediainfo import MediaInfo
 import warnings
+import recognize
+import enhance
+from .utils import preprocess
+from .recognition.metric import cal_average_WER, cal_single_WER
+
 warnings.filterwarnings("ignore")
-
-from .features.speech_enhancement.utils.preprocess import extract_audio_from_video
-from .features.speech_enhancement.enhancement import enhance_speech
-from .features.speech_recognition.recognition import speech_recognize
-from .features.speech_recognition.utils.preprocess import load_audio_file
-from .features.speech_recognition.utils.metrics import cal_average_WER,cal_single_WER
-
 
 def measure_time_exc(enhance_file: str, func, **kargs):
     print(f"Measuring {func.__name__} module...")
@@ -44,14 +40,17 @@ def measure_time_exc(enhance_file: str, func, **kargs):
 def eval_speech_recog(eval_data_dir: str, gt_value_file: str, lang: str, enh: bool):
     assert os.path.isfile(gt_value_file)
     assert os.path.isdir(eval_data_dir)
+    enhance_model = enhance.Enhancement()
+    recognize_model = recognize.Recognition()
     preds = []
     gts = []
     with open(gt_value_file, "r") as f:
         gt_values = json.load(f)
         for file in tqdm(os.listdir(eval_data_dir)):
-            pred = speech_recognize(os.path.join(eval_data_dir[:-1], file),
-                                    enhance=enh,
-                                    lang=lang)["text"].lower().translate(str.maketrans('', '', string.punctuation))
+            speech, sr = preprocess.load_audio_file(os.path.join(eval_data_dir[:-1], file))
+            enhance_audio, _ = enhance_model(speech, sr)
+
+            pred = recognize_model.infer(enhance_audio)["text"].lower().translate(str.maketrans('', '', string.punctuation))
             gt = gt_values[lang][os.path.splitext(file)[0]].lower().translate(str.maketrans('', '', string.punctuation))
             print(f"[EVAL] WER: {cal_single_WER(prediction=[pred], reference=[gt])}")
             preds.append(pred)
@@ -73,14 +72,14 @@ def eval():
     #     speech_enhanced.squeeze(0).cpu().detach().numpy(), False)
     # root = "/mnt/c/Users/ASUS/OneDrive/Documents/Capstone project sp23/audio"
     # for mp3_file in ["000.mp3"]:#,'006.mp4','002.mp4']:
-    ds = load_audio_file({
-        # "file": os.path.join(root, mp3_file)
-        'file': mp3_file
-    })
-    print(ds['speech'].size)
-    speech_recog = enhance_speech(ds["speech"],ds["sampling rate"])#, enhance=False)
-
-    print(speech_recog)
+    # ds = load_audio_file({
+    #     # "file": os.path.join(root, mp3_file)
+    #     'file': mp3_file
+    # })
+    # print(ds['speech'].size)
+    # speech_recog = enhance_speech(ds["speech"],ds["sampling rate"])#, enhance=False)
+    #
+    # print(speech_recog)
 
 
 if __name__ == '__main__':

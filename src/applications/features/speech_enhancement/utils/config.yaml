@@ -1,4 +1,0 @@
-model: "dns64"
-sampling_rate: 16000
-device: "cpu"
-data_path: ""

@@ -1,7 +1,6 @@
 from flask import request, Blueprint, render_template, flash, redirect, send_file, jsonify
-from .applications.features.speech_translation import preprocess, model
-from .applications.features.speech_recognition import recognition
-from .applications.features.speech_enhancement import enhancement
+from .applications import enhance, recognize, translate
+from .applications.utils import preprocess, postprocess
 import xml.etree.ElementTree as ET
 import os
 import torch
@@ -10,12 +9,17 @@ import torch
 views = Blueprint('views', __name__)
 
 pretemp = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
-TOKEN, MODEL = model.backBone()
 
 if torch.cuda.is_available():
     DEVICE = "cuda"
 else:
     DEVICE = "cpu"
+
+ENHANCE_MODEL = enhance.Enhancement(device=DEVICE)
+RECOGNIZE_MODEL = recognize.Recognition(device=DEVICE)
+TRANSLATE_MODEL = translate.Translation(device=DEVICE)
+
+store_database = dict()
 
 
 @views.route('/')
@@ -29,31 +33,37 @@ def translate():
 
 @views.route('/translated', methods=['POST'])
 def run_translate():
+    file_extension = None
+
     if request.method == "POST":
         print('POST')
+
         if request.form['text']:
             text = request.form['text']
+            lang = request.form['lang']
             file_name = request.form['name'].split('.')[0]
+            file_extension = request.form['name'].split('.')[-1]
 
-            TEMP_TXT_OUTPUT_FILE = f'{pretemp}/static/{file_name}_vi.txt'
-            TEMP_XML_FILE = f'{pretemp}/static/{file_name}_vi.xml'
-            TEMP_SRT_FILE = f'{pretemp}/static/{file_name}_vi.srt'
+            TEMP_TXT_OUTPUT_FILE = f'{pretemp}/database/translate/text/{file_name}_vi.txt'
 
-            xml = None
-            try:
-                xml = ET.fromstring(text)
-                print("XML parse success")
-            except:
-                print("xml fail")
         else:
             print("Error")
             flash('Content conflict', category='error')
             return redirect("/translate")
 
-    if xml:
+    if file_extension == 'xml':
+        xml = None
+        try:
+            xml = ET.fromstring(text)
+            TEMP_XML_FILE = f'{pretemp}/database/translate/xml/{file_name}_vi.xml'
+            TEMP_SRT_FILE = f'{pretemp}/database/translate/srt/{file_name}_vi.srt'
+            print("XML parse success")
+        except:
+            print("xml fail")
+
         tags = xml.findall(".//p")
-        ptags = ["en: " + tag.text.strip() for tag in tags]
-        ptranslate = [p[4:] for p in model.infer(ptags, TOKEN, MODEL, 256, 'xml', DEVICE)]
+        ptags = [f"{lang}: " + tag.text.strip() for tag in tags]
+        ptranslate = [p[4:] for p in TRANSLATE_MODEL.infer(ptags, 'xml')]
 
         for idex in range(len(ptranslate)):
             tags[idex].text = ptranslate[idex]
@@ -79,7 +89,7 @@ def run_translate():
 
 
     else:
-        result = model.infer(['en: ' + text], TOKEN, MODEL, 256, DEVICE)[0][4:]
+        result = TRANSLATE_MODEL.infer([f'{lang}: ' + text])[0]
         #Write result to temp file
         with open(TEMP_TXT_OUTPUT_FILE, 'w', encoding="utf-8") as f:
             f.write(result)
@@ -108,34 +118,29 @@ def run_recognized():
             print('Done receive')
             audio_name = ''.join(raw_audio.filename.split('.')[:-1])
 
-            audio_temp_dir = f'{pretemp}/database/audio/temp_{raw_audio.filename}'
+            audio_temp_dir = f'{pretemp}/database/recognize/audio/temp_{raw_audio.filename}'
             raw_audio.save(audio_temp_dir)
 
-            ds = recognition.map_to_array({
-                'file': audio_temp_dir
-            })
+            speech, sr = preprocess.load_audio_file(audio_temp_dir)
+            enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr)
+            transcription = RECOGNIZE_MODEL.infer(enhance_speech)
 
-            ds["speech"], sr = enhancement.enhance_speech(ds['speech'])
-
-            ds["speech"] = ds["speech"].squeeze().cpu().detach().numpy()
-
-            with torch.no_grad():
-                transcription = recognition.model(ds["speech"], chunk_length_s=recognition.chunk_length)
-
-
-            txt_audio_output = f"{pretemp}/database/text/recognized/{audio_name}.txt"
+            txt_audio_output = f"{pretemp}/database/recognize/text/{audio_name}.txt"
 
             with open(txt_audio_output, 'w', encoding="utf-8") as f:
                 f.write(transcription['text'])
 
-            xml_audio_output = f'{pretemp}/database/xml/recognized/{audio_name}.xml'
+            xml_audio_output = f'{pretemp}/database/recognize/xml/{audio_name}.xml'
+            srt_audio_output = f'{pretemp}/database/recognize/srt/{audio_name}.srt'
             with open(xml_audio_output, 'w', encoding="utf-8") as f:
-                xml_data = recognition.export_xml(transcription)
+                xml_data = postprocess.export_xml(transcription)
                 f.write(xml_data)
+                postprocess.xml_to_srt(xml_data, srt_audio_output)
 
             return jsonify({"text": transcription['text'],
                             "txt_href": f'/download/{txt_audio_output}',
-                            "xml_href": f'/download/{xml_audio_output}'})
+                            "xml_href": f'/download/{xml_audio_output}',
+                            "srt_href": f'/download/{srt_audio_output}'})
 
         else:
             return redirect('/recognize')

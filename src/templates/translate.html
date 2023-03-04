@@ -13,12 +13,20 @@
                 <input type="text" id="file-name" hidden>
                 <textarea id="outNoteCon" name="outputNote" readonly></textarea>
             </div>
-            <a id="translate_button" class="start-bar" href="javascript:translate('#inNoteCon',
+            <a id="vi2en_button" class="start-bar" href="javascript:translate('#inNoteCon',
                                 '#outNoteCon',
                                 '#txtpath',
                                 '#xmlpath',
                                 '#srtpath',
-                                '#file-name');">Translate</a>
+                                '#file-name',
+                                'vi');">Vi2En</a>
+            <a id="en2vi_button" class="start-bar" href="javascript:translate('#inNoteCon',
+                                '#outNoteCon',
+                                '#txtpath',
+                                '#xmlpath',
+                                '#srtpath',
+                                '#file-name',
+                                'en');">En2Vi</a>
             <img id="loading-image" src="{{ url_for('static', filename='loading.gif') }}" hidden>
             <a id="txtpath">Download TXT</a>
             <a id="xmlpath">Download XML</a>
@@ -30,7 +38,7 @@
 </section>
 {% endblock %}
 
-{% block readtext %}
+{% block jscode %}
 <script type="text/javascript">
     var reader = new FileReader(); //GLOBAL File Reader object for demo purpose only
 
@@ -95,10 +103,11 @@
 
 </script>
 <script>
-    function translate(sourceElem, destElem, txtId, xmlId, srtId, name) {
+    function translate(sourceElem, destElem, txtId, xmlId, srtId, name, lang) {
             $.post('/translated', {
                 text: $(sourceElem).val(),
-                name: $(name).val()
+                name: $(name).val(),
+                lang: lang
             }).done(function(response) {
                 $(destElem).val(response['text'])
                 $(txtId).attr("href", response['txt_href'])
