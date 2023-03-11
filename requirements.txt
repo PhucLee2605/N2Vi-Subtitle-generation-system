@@ -4,7 +4,6 @@ speechbrain
 torch
 torchaudio
 torchtext
-#torchvision==0.8.2+cu110
 tqdm
 librosa==0.9.2
 datasets

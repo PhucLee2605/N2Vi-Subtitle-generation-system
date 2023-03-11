@@ -36,3 +36,21 @@ def export_xml(data: Dict):
     xmlcontents += '</body>\n</timedtext>'
 
     return xmlcontents
+
+
+def stack_chunks(chunks, length=20, threshold=2000):
+    begin_time = chunks[0]['timestamp'][0] * 1000
+    line_end_time = chunks[0]['timestamp'][1] * 1000
+    scripts = list()
+    line = ""
+    for index in range(len(chunks)):
+        if chunks[index]['timestamp'][0] * 1000 - line_end_time > threshold or len(line) > length:
+            scripts.append({'text': line.strip(), 'timestamp': [milliseconds_to_time(begin_time), milliseconds_to_time(line_end_time)]})
+            line = chunks[index]['text'] + " "
+            begin_time = chunks[index]['timestamp'][0] * 1000
+        else:
+            line += chunks[index]['text'] + " "
+            line_end_time = chunks[index]['timestamp'][1] * 1000
+
+
+    return scripts

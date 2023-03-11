@@ -14,7 +14,6 @@ def load_audio_file(audio):
     try:
         assert os.path.isfile(audio)
         fileInfo = MediaInfo.parse(audio)
-        print(fileInfo.tracks)
         for track in fileInfo.tracks:
             if track.track_type == "Video":
                 speech, sr = extract_audio_from_video(audio)
