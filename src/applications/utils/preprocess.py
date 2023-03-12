@@ -5,7 +5,7 @@ import numpy as np
 import librosa as ls
 import xml.etree.ElementTree as ET
 from moviepy.editor import VideoFileClip
-import torchaudio
+import re
 from pymediainfo import MediaInfo
 #Enhance and Recognition
 
@@ -116,4 +116,28 @@ def handle_json_data(jsonpath, input='en', output='vi'):
     for id in data['vi'].keys():
         results.append([id, data[input][id], data[output][id]])
 
+    return results
+
+def is_srt_format(string):
+    lines = string.strip().split('\n')
+    for i in range(0, len(lines), 4):
+        if not lines[i].isdigit():
+            return False
+        timecode = lines[i+1].split(' --> ')
+        if len(timecode) != 2:
+            return False
+        for tc in timecode:
+            if not re.match(r'\d{2}:\d{2}:\d{2},\d{3}', tc):
+                return False
+        if not lines[i+2].strip():
+            return False
+    return True
+
+def extract_srt(str):
+    if not is_srt_format(str):
+        raise ValueError('Not a valid SRT file')
+    lines = str.strip().split('\n')
+    results = list()
+    for i in range(0, len(lines), 4):
+        results.append(lines[i+2])
     return results
