@@ -127,6 +127,8 @@
                 if (response['xml_href']){
                     $(xmlId).attr("href", response['xml_href'])
                     $(xmlId).attr("target", "_blank")
+                }
+                if (response['srt_href']){
                     $(srtId).attr("href", response['srt_href'])
                     $(srtId).attr("target", "_blank")
                 }
