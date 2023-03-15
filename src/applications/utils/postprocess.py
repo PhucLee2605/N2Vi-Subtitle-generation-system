@@ -48,6 +48,7 @@ def stack_chunks(chunks, length=20, threshold=2000):
             scripts.append({'text': line.strip(), 'timestamp': [milliseconds_to_time(begin_time), milliseconds_to_time(line_end_time)]})
             line = chunks[index]['text'] + " "
             begin_time = chunks[index]['timestamp'][0] * 1000
+            line_end_time = chunks[index]['timestamp'][1] * 1000
         else:
             line += chunks[index]['text'] + " "
             line_end_time = chunks[index]['timestamp'][1] * 1000

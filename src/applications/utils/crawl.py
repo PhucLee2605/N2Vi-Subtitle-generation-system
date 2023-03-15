@@ -1,5 +1,4 @@
 from pytube import YouTube
-import ffmpeg
 import os
 import json
 import urllib

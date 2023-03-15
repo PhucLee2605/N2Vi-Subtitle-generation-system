@@ -1,0 +1,88 @@
+<timedtext format="3">
+<head>
+<ws id="1" ju="0" />
+<ws id="2" ju="2" />
+<wp id="1" ap="1" ah="50" av="0" rc="2" cc="32" />
+<wp id="2" ap="7" ah="50" av="100" rc="1" cc="32" />
+<wp id="4" ap="7" ah="50" av="100" rc="2" cc="32" />
+<wp id="5" ap="7" ah="50" av="100" rc="3" cc="32" />
+<wp id="3" ap="7" ah="50" av="100" rc="4" cc="32" />
+</head>
+<body>
+<p t="0" d="7000" wp="1" ws="1">( Audio) My Den</p>
+<p t="6961" d="1627" wp="2" ws="2">In the early 20th century,</p>
+<p t="8588" d="4379" wp="3" ws="2">A meteorologist named Alfred Wegener noticed striking similarities.</p>
+<p t="12967" d="3003" wp="4" ws="2">Between the coasts of Africa and South America.</p>
+<p t="16179" d="3920" wp="3" ws="2">These observations led him to propose a controversial new theory:</p>
+<p t="20183" d="4045" wp="5" ws="2">Maybe these continents and many others were once connected.</p>
+<p t="24228" d="2378" wp="4" ws="2">On a single, vast continent.</p>
+<p t="26814" d="5172" wp="3" ws="2">Wegener's theory of "continental drift" goes against popular opinion</p>
+<p t="31986" d="3212" wp="5" ws="2">That the continents on Earth have remained stable for millennia.</p>
+<p t="35198" d="2919" wp="4" ws="2">And for his supporters, it took him almost 50 years.</p>
+<p t="38117" d="2461" wp="4" ws="2">To convince the scientific community on a larger scale.</p>
+<p t="40828" d="2586" wp="4" ws="2">But today, we know something even more interesting.</p>
+<p t="43790" d="4838" wp="3" ws="2">In the oldest runoff of supercontinents, "Pangea" is only thought to be the most recent.</p>
+<p t="48628" d="1835" wp="4" ws="2">And it's not going to be the last supercontinent.</p>
+<p t="50713" d="5297" wp="3" ws="2">"Continuous continental drift" laid the foundation for the modern theory of plate tectonics,</p>
+<p t="56052" d="4254" wp="3" ws="2">This tells us that the Earth's crust is made up of huge, jagged plates.</p>
+<p t="60306" d="4588" wp="5" ws="2">That moves over a partially molten rock layer is called mantle.</p>
+<p t="65269" d="6006" wp="5" ws="2">These layers move at a rate of only about 2.5 to 10 centimeters per year.</p>
+<p t="71526" d="3587" wp="5" ws="2">But these ascending displacements shape the surface of the planet.</p>
+<p t="75363" d="3044" wp="4" ws="2">So to determine when a supercontinent will emerge,</p>
+<p t="78407" d="2837" wp="5" ws="2">So we need to predict where these patches are going to drift.</p>
+<p t="81661" d="3628" wp="3" ws="2">One method is to observe how they moved in the past.</p>
+<p t="85289" d="3420" wp="3" ws="2">Geologists can trace the location of continents over time.</p>
+<p t="88709" d="2920" wp="4" ws="2">We're measuring the changes in the magnetic field of the Earth.</p>
+<p t="92130" d="3962" wp="5" ws="2">As the lava cools, the magnetic minerals freeze.</p>
+<p t="96092" d="1960" wp="2" ws="2">at a particular time.</p>
+<p t="98136" d="2836" wp="4" ws="2">So by calculating the direction and the intensity</p>
+<p t="100972" d="2252" wp="4" ws="2">The magnetic field of a given rock.</p>
+<p t="103224" d="4463" wp="5" ws="2">We can discover latitude at the moment it cools.</p>
+<p t="107812" d="2794" wp="4" ws="2">But this method has serious limitations.</p>
+<p t="110606" d="4547" wp="3" ws="2">Because one thing is that a rock's magnetic field doesn't tell us about the longitude of the plate.</p>
+<p t="115319" d="3254" wp="4" ws="2">And the latitude measurement can be either north or south.</p>
+<p t="119073" d="4755" wp="3" ws="2">Worse still, the magnetic data was erased when the rock heated up again.</p>
+<p t="123828" d="3503" wp="4" ws="2">Like in continental collisions or volcanic activity.</p>
+<p t="127582" d="5964" wp="3" ws="2">Geologists therefore need to use other methods to reconstruct continental positions.</p>
+<p t="133838" d="4004" wp="3" ws="2">The dating of fossils and comparison with the global fossil record</p>
+<p t="137842" d="3295" wp="5" ws="2">It can help identify areas that were previously connected.</p>
+<p t="141262" d="4630" wp="3" ws="2">The same is true for other cracks and deformations of the Earth's crust.</p>
+<p t="145892" d="3169" wp="5" ws="2">This can sometimes be traced through continental plates.</p>
+<p t="149687" d="3212" wp="5" ws="2">Using these methods, scientists have been able to string together</p>
+<p t="152899" d="3336" wp="5" ws="2">Relatively accurate history of plate movement,</p>
+<p t="156402" d="4379" wp="3" ws="2">And their research has revealed a pattern that spans hundreds of millions of years.</p>
+<p t="161032" d="2502" wp="4" ws="2">What is now known as the "Wilson Cycle."</p>
+<p t="163534" d="3045" wp="4" ws="2">It's a prediction of how the continents have split and merged.</p>
+<p t="166579" d="3545" wp="5" ws="2">And recently it predicted that the next supercontinent would form.</p>
+<p t="170124" d="3420" wp="4" ws="2">It's about 50 to 250 million years from today.</p>
+<p t="173836" d="3545" wp="5" ws="2">We can't know for sure what that continent will look like.</p>
+<p t="177381" d="3587" wp="5" ws="2">It could be a new Pangea rising from the closing of the Atlantic Ocean.</p>
+<p t="181260" d="4338" wp="4" ws="2">Or perhaps it's the formation of a new Pan-Asian Ocean.</p>
+<p t="185598" d="3170" wp="5" ws="2">But while its shape and size remain a mystery,</p>
+<p t="188768" d="4671" wp="3" ws="2">We know that these changes will affect more than national boundaries.</p>
+<p t="193689" d="5172" wp="3" ws="2">In the past, plate collisions have caused major environmental changes.</p>
+<p t="199070" d="5213" wp="5" ws="2">When the supercontinent Rodinia broke up about 750 million years ago,</p>
+<p t="204283" d="3462" wp="5" ws="2">It left a vast continent vulnerable to weathering.</p>
+<p t="208079" d="4880" wp="5" ws="2">The recently discovered rock has absorbed more CO2 from the rain,</p>
+<p t="213042" d="3462" wp="5" ws="2">This removes a lot of carbon dioxide from the atmosphere.</p>
+<p t="216504" d="4588" wp="5" ws="2">The Earth was in what is known as the " Snowball Earth. "</p>
+<p t="221801" d="4880" wp="3" ws="2">Over time, volcanic activity released CO2, which melted this ice.</p>
+<p t="226681" d="3920" wp="5" ws="2">But that process took another three to six million years.</p>
+<p t="230768" d="2920" wp="5" ws="2">Meanwhile, as the next supercontinent regrouped,</p>
+<p t="233688" d="1960" wp="4" ws="2">It's more likely to heat things up.</p>
+<p t="235940" d="4504" wp="5" ws="2">Plate displacements and continental collisions can create and extend</p>
+<p t="240444" d="1919" wp="4" ws="2">The cracks in the Earth's crust.</p>
+<p t="242363" d="4713" wp="3" ws="2">This leads to the latent release of large amounts of carbon and CH4 into the atmosphere.</p>
+<p t="247243" d="4212" wp="3" ws="2">The flooding of greenhouse gases will cause the planet to warm up rapidly.</p>
+<p t="251455" d="2461" wp="4" ws="2">It can cause mass extinction.</p>
+<p t="254292" d="4379" wp="3" ws="2">The size of these cracks would be almost impossible to seal.</p>
+<p t="258671" d="4254" wp="3" ws="2">Even if we could, the pressure would only create new cracks.</p>
+<p t="263050" d="4463" wp="5" ws="2">Fortunately, we've had at least 50 million years to come up with a solution here.</p>
+<p t="267722" d="2168" wp="4" ws="2">And we may have discovered something.</p>
+<p t="270141" d="5380" wp="3" ws="2">In Iceland, recent tests have shown that it is possible to store carbon in basalt.</p>
+<p t="275521" d="3504" wp="5" ws="2">This makes the conversion of these gases into rock very fast.</p>
+<p t="279025" d="2836" wp="5" ws="2">So there's a possibility of a global network of pipelines.</p>
+<p t="281861" d="4004" wp="5" ws="2">They can redirect the gas that's coming out of the rock into basalt deposits.</p>
+<p t="285865" d="4796" wp="3" ws="2">This will reduce emissions and protect our future supercontinent.</p>
+</body>
+</timedtext>

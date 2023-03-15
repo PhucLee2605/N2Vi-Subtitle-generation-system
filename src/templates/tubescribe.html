@@ -1,0 +1,52 @@
+{% extends "index.html" %}
+
+
+{% block banner %}
+<section class="banner_main" xmlns="http://www.w3.org/1999/html">
+    <div>
+        <form action="/get_transcribe" style="border: None;" method="post" enctype="multipart/form-data" name="youtube-scribe">
+            <div>
+                <textarea id="url_tubescribe" style="display: block; margin-left: auto; margin-right: auto; margin-bottom: 30px;" name="url_input" placeholder="https://www.youtube.com/watch?v=..."></textarea>
+                <input type="text" id="file-name" hidden>
+            </div>
+            <div id="button_tubescribe">
+                <a id="scribe" style="display: block; margin-left: auto; margin-right: auto;" class="start-bar" href="javascript:getscribe('#url_tubescribe',
+                                    '#srtpath');">SUB IT!</a>
+            </div>
+            <div id="loading">
+                <img class="center" id="loading-image" src="{{ url_for('static', filename='loading.gif') }}">
+            </div>
+            <a style="width: 100%;display: block; margin-left: auto; margin-right: auto;" id="srtpath">Download SRT</a>
+        </form>
+    </div>
+</section>
+
+
+{% endblock %}
+
+{% block jscode %}
+
+<script>
+$(document).ready(function () {
+    $(document).ajaxStart(function () {
+        $("#loading").show();
+        $("#button_tubescribe").hide();
+    }).ajaxStop(function () {
+        $("#loading").hide();
+        $("#button_tubescribe").show();
+    });
+});
+
+function getscribe(sourceElem, srtId) {
+    $.post('/get_transcribe', {
+        url: $(sourceElem).val()
+    }).done(function(response) {
+        $(srtId).attr("href", response['srt_href'])
+        $(srtId).attr("target", "_blank")
+    }).fail(function() {
+        $(sourceElem).attr("placeholder", "Invalid URL");
+    });
+}
+
+</script>
+{% endblock %}

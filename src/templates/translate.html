@@ -5,7 +5,7 @@
 <section class="banner_main" xmlns="http://www.w3.org/1999/html" onload="checkFileAPI();">
     <div>
         <form action="/translated" method="post" enctype="multipart/form-data" name="form-translation">
-            <input id="upload_file" onchange="readText(this)" type="file" name="file-script" accept=".txt, .xml">
+            <input id="upload_file" onchange="readText(this)" type="file" name="file-script" accept=".txt, .xml, .srt">
             <p>Drag your files here or click in this area.</p>
             <br>
             <select style="width: 49%" id="lang">
@@ -127,6 +127,9 @@
                 if (response['xml_href']){
                     $(xmlId).attr("href", response['xml_href'])
                     $(xmlId).attr("target", "_blank")
+                } else {
+                    $(xmlId).removeAttr("href")
+                    $(xmlId).removeAttr("target")
                 }
                 if (response['srt_href']){
                     $(srtId).attr("href", response['srt_href'])
