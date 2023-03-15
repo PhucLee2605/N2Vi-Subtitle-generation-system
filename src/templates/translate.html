@@ -8,29 +8,32 @@
             <input id="upload_file" onchange="readText(this)" type="file" name="file-script" accept=".txt, .xml">
             <p>Drag your files here or click in this area.</p>
             <br>
+            <select style="width: 49%" id="lang">
+                    <option value="en">English</option>
+                    <option value="vi">Vietnamese</option>
+            </select>
             <div>
                 <textarea id="inNoteCon" name="inputNote" placeholder="Translate script"></textarea>
                 <input type="text" id="file-name" hidden>
                 <textarea id="outNoteCon" name="outputNote" readonly></textarea>
             </div>
-            <a id="vi2en_button" class="start-bar" href="javascript:translate('#inNoteCon',
-                                '#outNoteCon',
-                                '#txtpath',
-                                '#xmlpath',
-                                '#srtpath',
-                                '#file-name',
-                                'vi');">Vi2En</a>
-            <a id="en2vi_button" class="start-bar" href="javascript:translate('#inNoteCon',
-                                '#outNoteCon',
-                                '#txtpath',
-                                '#xmlpath',
-                                '#srtpath',
-                                '#file-name',
-                                'en');">En2Vi</a>
-            <img id="loading-image" src="{{ url_for('static', filename='loading.gif') }}" hidden>
-            <a id="txtpath">Download TXT</a>
-            <a id="xmlpath">Download XML</a>
-            <a id="srtpath">Download SRT</a>
+            <div id="button_translate">
+                <a id="translate" class="start-bar" href="javascript:translate('#inNoteCon',
+                                    '#outNoteCon',
+                                    '#txtpath',
+                                    '#xmlpath',
+                                    '#srtpath',
+                                    '#file-name',
+                                    '#lang');">Translate</a>
+            </div>
+            <div id="loading">
+                <img class="center" id="loading-image" src="{{ url_for('static', filename='loading.gif') }}">
+            </div>
+            <div>
+                <a id="txtpath">Download TXT</a>
+                <a id="xmlpath">Download XML</a>
+                <a id="srtpath">Download SRT</a>
+            </div>
 
         </form>
     </div>
@@ -103,11 +106,20 @@
 
 </script>
 <script>
+    $(document).ready(function () {
+    $(document).ajaxStart(function () {
+        $("#loading").show();
+        $("#button_translate").hide();
+    }).ajaxStop(function () {
+        $("#loading").hide();
+        $("#button_translate").show();
+    });
+});
     function translate(sourceElem, destElem, txtId, xmlId, srtId, name, lang) {
             $.post('/translated', {
                 text: $(sourceElem).val(),
                 name: $(name).val(),
-                lang: lang
+                lang: $(lang).val()
             }).done(function(response) {
                 $(destElem).val(response['text'])
                 $(txtId).attr("href", response['txt_href'])
@@ -115,6 +127,8 @@
                 if (response['xml_href']){
                     $(xmlId).attr("href", response['xml_href'])
                     $(xmlId).attr("target", "_blank")
+                }
+                if (response['srt_href']){
                     $(srtId).attr("href", response['srt_href'])
                     $(srtId).attr("target", "_blank")
                 }

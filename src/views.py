@@ -1,6 +1,6 @@
 from flask import request, Blueprint, render_template, flash, redirect, send_file, jsonify
 from .applications import enhance, recognize, translate
-from .applications.utils import preprocess, postprocess
+from .applications.utils import preprocess, postprocess, crawl
 import xml.etree.ElementTree as ET
 import os
 import torch
@@ -18,8 +18,6 @@ else:
 ENHANCE_MODEL = enhance.Enhancement(device=DEVICE)
 RECOGNIZE_MODEL = recognize.Recognition(device=DEVICE)
 TRANSLATE_MODEL = translate.Translation(device=DEVICE)
-
-store_database = dict()
 
 
 @views.route('/')
@@ -59,7 +57,9 @@ def run_translate():
             TEMP_SRT_FILE = f'{pretemp}/database/translate/srt/{file_name}_vi.srt'
             print("XML parse success")
         except:
-            print("xml fail")
+            print("XML parse error")
+            flash('XML parse error', category='error')
+            return redirect("/translate")
 
         tags = xml.findall(".//p")
         ptags = [f"{lang}: " + tag.text.strip() for tag in tags]
@@ -87,6 +87,32 @@ def run_translate():
                         "xml_href": xmlpath,
                         "srt_href": srtpath})
 
+    elif file_extension == 'srt':
+        try:
+            srt = preprocess.extract_srt(text)
+            TEMP_SRT_FILE = f'{pretemp}/database/translate/srt/{file_name}_vi.srt'
+            print("SRT parse success")
+        except:
+            print("SRT parse error")
+            flash('SRT parse error', category='error')
+            return redirect("/translate")
+
+        ptags = [f"{lang}: " + p.strip() for p in srt]
+        ptranslate = [p[4:] for p in TRANSLATE_MODEL.infer(ptags, 'xml')]
+        text_data = ' '.join([p.strip() for p in ptranslate])
+
+        for i in range(len(srt)):
+            srt_trans = text.replace(srt[i], ptranslate[i])
+
+        with open(TEMP_TXT_OUTPUT_FILE, 'w', encoding="utf-8") as f:
+            f.write(text_data)
+
+        with open(TEMP_SRT_FILE, "w", encoding="utf-8") as f:
+            f.write(srt_trans)
+
+        return jsonify({"text": text_data,
+                        "txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}',
+                        "srt_href": f'/download/{TEMP_SRT_FILE}'})
 
     else:
         result = TRANSLATE_MODEL.infer([f'{lang}: ' + text])[0]
@@ -98,7 +124,7 @@ def run_translate():
                         "txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}'})
 
 
-
+#RECOGNIZE
 @views.route('/recognize')
 def recognize():
     return render_template('recognize.html')
@@ -120,8 +146,11 @@ def run_recognized():
 
             audio_temp_dir = f'{pretemp}/database/recognize/audio/temp_{raw_audio.filename}'
             raw_audio.save(audio_temp_dir)
+            try:
+                speech, sr = preprocess.load_audio_file(audio_temp_dir)
+            except:
+                return jsonify({"text": "Error: File not supported"}), 500
 
-            speech, sr = preprocess.load_audio_file(audio_temp_dir)
             enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr)
             transcription = RECOGNIZE_MODEL.infer(enhance_speech)
 
@@ -144,6 +173,50 @@ def run_recognized():
 
         else:
             return redirect('/recognize')
+
+
+#GET TRANSCRIPT
+
+@views.route('/tubescribe')
+def tubescribe():
+    return render_template('tubescribe.html')
+
+
+@views.route('/get_transcribe', methods=['POST'])
+def get_transcribe():
+    if request.method == 'POST':
+        url = request.form['url']
+        try:
+            audio_name = crawl.download_audio(url, 'src/database/tubescribe/audio')
+        except:
+            return jsonify('password_update_error'), 500
+
+        audio_path = os.path.join(f'{pretemp}/database/tubescribe/audio', f'{audio_name}.mp4')
+
+        speech, sr = preprocess.load_audio_file(audio_path)
+        enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr)
+        transcription = RECOGNIZE_MODEL.infer(enhance_speech)
+
+        stack_words = postprocess.stack_chunks(transcription['chunks'])
+
+        lines = ['en: ' + line['text'] for line in stack_words]
+        predict = TRANSLATE_MODEL.infer(lines, 'xml')
+
+        srt_output = f'{pretemp}/database/tubescribe/srt/{audio_name}.srt'
+        with open(srt_output, 'w', encoding="utf-8") as f:
+            for index in range(len(predict)):
+                f.write(f"{index + 1}\n")
+                f.write(f"{lines[index]['timestamp'][0]} --> {lines[index]['timestamp'][1]}\n")
+                f.write(f"{predict[index]['text']}\n\n")
+
+        return jsonify({"srt_href": f'/download/{srt_output}'})
+
+    return redirect('/tubescribe')
+
+
+
+
+
 
 @views.route('/download/<path:filename>')
 def download(filename):

@@ -1,7 +1,19 @@
 from pytube import YouTube
+import ffmpeg
 import os
 import json
 import urllib
+from hashlib import sha256
+
+
+def download_audio(url, path):
+    yt = YouTube(url)
+
+    t = yt.streams.filter(only_audio=True)
+
+    name_encrypted = sha256(yt.streams[0].title.encode('utf-8')).hexdigest()
+    t[0].download(filename=f"{name_encrypted}.mp4", output_path=path)
+    return name_encrypted
 
 
 def crawlData(channelid, api, num):
@@ -66,9 +78,3 @@ def extractInfo(filename, link, database="data"):
     enCap.download(filename, srt=False, output_path=enCapPath)
     audio.download(output_path=audioPath, filename=f'{filename}.mp3')
     print(f'Load {filename} succesfully')
-
-
-CHANNEL_ID = "UCsooa4yRKGN_zEE8iknghZA"
-API_KEY = "AIzaSyCylbK00E9Aenh-Z5zskLpH4QPzwEq1XVc"
-
-crawlData(CHANNEL_ID, API_KEY, 50)
