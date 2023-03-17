@@ -3,7 +3,7 @@ from typing import Any, Callable, Union
 import config_with_yaml as config
 from denoiser.dsp import convert_audio
 
-from .recognition.model import enhance_pipeline
+from .recognition.model import recog_pipeline
 
 cfg = config.load("src/applications/recognition/recog_config.yaml")
 
@@ -59,10 +59,10 @@ class Recognition():
             device (str, optional): device to run inference on. Defaults to "cpu".
         """
         if lang == "vi":
-            self.recog_model = enhance_pipeline(cfg.getProperty("vi_model_name"),
+            self.recog_model = recog_pipeline(cfg.getProperty("vi_model_name"),
                                                 device)
         elif lang == "en":
-            self.recog_model = enhance_pipeline(cfg.getProperty("en_model_name"),
+            self.recog_model = recog_pipeline(cfg.getProperty("en_model_name"),
                                                 device)
         self.device = device
         self.chunk_length = chunk_length
