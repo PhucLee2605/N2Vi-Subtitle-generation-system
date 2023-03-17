@@ -10,10 +10,7 @@ views = Blueprint('views', __name__)
 
 pretemp = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
 
-if torch.cuda.is_available():
-    DEVICE = "cuda"
-else:
-    DEVICE = "cpu"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 ENHANCE_MODEL = enhance.Enhancement(device=DEVICE)
 RECOGNIZE_MODEL = recognize.Recognition(device=DEVICE)
@@ -29,12 +26,13 @@ def home():
 def translate():
     return render_template("translate.html")
 
+
 @views.route('/translated', methods=['POST'])
-def run_translate():
+def run_translation():
     file_extension = None
 
     if request.method == "POST":
-        print('POST')
+        print('[INFO] POST')
 
         if request.form['text']:
             text = request.form['text']
@@ -45,7 +43,7 @@ def run_translate():
             TEMP_TXT_OUTPUT_FILE = f'{pretemp}/database/translate/text/{file_name}_vi.txt'
 
         else:
-            print("Error")
+            print("[ERROR] Error translating")
             flash('Content conflict', category='error')
             return redirect("/translate")
 
@@ -55,9 +53,9 @@ def run_translate():
             xml = ET.fromstring(text)
             TEMP_XML_FILE = f'{pretemp}/database/translate/xml/{file_name}_vi.xml'
             TEMP_SRT_FILE = f'{pretemp}/database/translate/srt/{file_name}_vi.srt'
-            print("XML parse success")
+            print("[INFO] XML parse successfully")
         except:
-            print("XML parse error")
+            print("[ERROR] XML parse error")
             flash('XML parse error', category='error')
             return redirect("/translate")
 
@@ -91,9 +89,9 @@ def run_translate():
         try:
             srt = preprocess.extract_srt(text)
             TEMP_SRT_FILE = f'{pretemp}/database/translate/srt/{file_name}_vi.srt'
-            print("SRT parse success")
+            print("[INFO] SRT parse successfully")
         except:
-            print("SRT parse error")
+            print("[ERROR] SRT parse error")
             flash('SRT parse error', category='error')
             return redirect("/translate")
 
@@ -116,7 +114,7 @@ def run_translate():
 
     else:
         result = TRANSLATE_MODEL.infer([f'{lang}: ' + text])[0]
-        #Write result to temp file
+        # Write result to temp file
         with open(TEMP_TXT_OUTPUT_FILE, 'w', encoding="utf-8") as f:
             f.write(result)
 
@@ -124,35 +122,36 @@ def run_translate():
                         "txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}'})
 
 
-#RECOGNIZE
+# RECOGNIZE
 @views.route('/recognize')
 def recognize():
     return render_template('recognize.html')
 
+
 @views.route('/recognized', methods=['POST'])
-def run_recognized():
-    print('Recognize')
+def run_recognition():
+    print('[INFO] Recognizing speech')
     if request.method == 'POST':
         try:
             raw_audio = request.files.get('audio')
         except:
-            flash('No file')
+            flash('There is no file provided')
             return redirect('/recognize')
 
-
         if raw_audio:
-            print('Done receive')
+            print('[INFO] File received')
             audio_name = ''.join(raw_audio.filename.split('.')[:-1])
 
             audio_temp_dir = f'{pretemp}/database/recognize/audio/temp_{raw_audio.filename}'
             raw_audio.save(audio_temp_dir)
             try:
-                speech, sr = preprocess.load_audio_file(audio_temp_dir)
+                speech, sr = preprocess.load_audio_file(audio_temp_dir, 16000)
             except:
-                return jsonify({"text": "Error: File not supported"}), 500
+                return jsonify({"text": "Error: File not supported"}), 400 #TODO check web error for file not support
 
-            enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr)
-            transcription = RECOGNIZE_MODEL.infer(enhance_speech)
+            enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr, device=DEVICE)
+            transcription = RECOGNIZE_MODEL.infer(enhance_speech,
+                                                  device=DEVICE)
 
             txt_audio_output = f"{pretemp}/database/recognize/text/{audio_name}.txt"
 
@@ -175,7 +174,7 @@ def run_recognized():
             return redirect('/recognize')
 
 
-#GET TRANSCRIPT
+# GET TRANSCRIPT
 
 @views.route('/tubescribe')
 def tubescribe():
@@ -189,11 +188,11 @@ def get_transcribe():
         try:
             audio_name = crawl.download_audio(url, 'src/database/tubescribe/audio')
         except:
-            return jsonify('password_update_error'), 500
+            return jsonify('Error when downloading from provided url'), 404
 
         audio_path = os.path.join(f'{pretemp}/database/tubescribe/audio', f'{audio_name}.mp4')
 
-        speech, sr = preprocess.load_audio_file(audio_path)
+        speech, sr = preprocess.load_audio_file(audio_path, 16000)
         enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr)
         transcription = RECOGNIZE_MODEL.infer(enhance_speech)
 
@@ -212,10 +211,6 @@ def get_transcribe():
         return jsonify({"srt_href": f'/download/{srt_output}'})
 
     return redirect('/tubescribe')
-
-
-
-
 
 
 @views.route('/download/<path:filename>')

@@ -1,55 +1,79 @@
 import torch
-from typing import Any, Union
-from .recognition.model import enhance_pipeline
+from typing import Any, Callable, Union
 import config_with_yaml as config
+from denoiser.dsp import convert_audio
 
+from .recognition.model import enhance_pipeline
 
 cfg = config.load("src/applications/recognition/recog_config.yaml")
 
 CHUNK_LENGTH = cfg.getProperty("chunk_lenght_s")
 
 
-def speech_recognize(audio: Union[str, Any], recog_model, chunk_length=CHUNK_LENGTH, sampling_rate: int = 22500) -> dict:
-    """Do speech recognition and return both raw text and words with timestamps
+def speech_recognize(audio: Any, recog_model: Any, chunk_length: int = CHUNK_LENGTH, sampling_rate: int = 16000, device: str = "cpu") -> dict:
+    """ Do speech recognition and return both raw text and sentences with timestamps
 
     Args:
-        audio (Union[str,Any]): can be file's name or audio loaded by librosa (mono)
-        enhance (boll): set to True to enhance speech before pass into recognition model (set to False if already enhanced or speech's quality is good)
+        audio (Any): Loaded audio in form of tensor
+        recog_model (Any): _description_
+        chunk_length (int, optional): Split input audio into chunks to infer model with big tensor without crashing memory. Defaults to CHUNK_LENGTH.
+        sampling_rate (int, optional): input audio's sampling rate. Defaults to 16000Hz.
+        device (str, optional): device to run speech recognition on. Defaut to "cpu"
+
     Returns:
-        _type_: {"text": "raw text from recognition",
+        dict: {"text": "raw text from recognition",
                 "chunks": [
-                            {"text": "word1", "timestamps": (start, end)},
-                            {"text": "word2", "timestamps": (start, end)},
+                            {"text": "sentence1", "timestamps": (start, end)},
+                            {"text": "sentence2", "timestamps": (start, end)},
                             ...
                         ]
                 }
     """
-    ds = dict()
 
+    ds = dict()
+    audio = convert_audio(wav=audio.to(device),
+                          from_samplerate=sampling_rate,
+                          to_samplerate=16000,
+                          channels=1)
     ds["speech"] = audio
     ds["sampling rate"] = sampling_rate
-
-    # if enhance:
-    #     ds["speech"], _ = enhance_speech(ds["speech"],
-    #                                      sampling_rate=ds["sampling rate"])
 
     ds["speech"] = ds["speech"].squeeze().cpu().detach().numpy()
 
     with torch.no_grad():
-        transcription = recog_model(ds["speech"], chunk_length_s=chunk_length)
+        transcription = recog_model(ds["speech"],
+                                    chunk_length_s=chunk_length,
+                                    return_timestamps=True)
 
     print("[INFO] Finished speech recognition")
     return transcription
 
 
 class Recognition():
-    def __init__(self, chunk_length=CHUNK_LENGTH, lang="en", device="cpu"):
-        if lang == "vi":
-            self.recog_model = enhance_pipeline(cfg.getProperty("vi_model_name"), device)
-        else:
-            self.recog_model = enhance_pipeline(cfg.getProperty("en_model_name"), device)
+    def __init__(self, chunk_length: int = CHUNK_LENGTH, lang: str = "en", device: str = "cpu") -> None:
+        """ Initiate Recognition
 
+        Args:
+            chunk_length (int, optional): Split input audio into chunks to infer model with big tensor without crashing memory. Defaults to CHUNK_LENGTH.
+            lang (str, optional): Language of input audio to recognize. "en" for English, "vi" for Vietnamses. Defaults to "en" - English.
+            device (str, optional): device to run inference on. Defaults to "cpu".
+        """
+        if lang == "vi":
+            self.recog_model = enhance_pipeline(cfg.getProperty("vi_model_name"),
+                                                device)
+        elif lang == "en":
+            self.recog_model = enhance_pipeline(cfg.getProperty("en_model_name"),
+                                                device)
+        self.device = device
         self.chunk_length = chunk_length
 
-    def infer(self, audio):
-        return speech_recognize(audio, self.recog_model, self.chunk_length)
+    def infer(self, audio: Any) -> Callable[[], dict]:
+        """ Infering speech recognition
+
+        Args:
+            audio (Any): Loaded audio to infer
+
+        Returns:
+            Callable[[], dict]: speech_recognize function
+        """
+        return speech_recognize(audio, self.recog_model, self.chunk_length, self.device)

@@ -1,9 +1,19 @@
+from typing import List
 from nltk.translate.bleu_score import sentence_bleu
 from .model import translate_model, infer
 import torch
 
+#TODO: complete docstring
+def cal_bleu(sen1: str, sen2: str) -> float:
+    """_summary_
 
-def bleuScore(sen1, sen2):
+    Args:
+        sen1 (str): _description_
+        sen2 (str): _description_
+
+    Returns:
+        float: _description_
+    """
     words1 = sen1.split(' ')
     words2 = sen2.split(' ')
     bleuscore = sentence_bleu([words1], words2)
@@ -11,15 +21,22 @@ def bleuScore(sen1, sen2):
     return bleuscore
 
 
-def valuateTranslate(data, max_length=256):
-    if torch.cuda.is_available():
-        device = 'cuda'
-    else:
-        device = 'cpu'
+#TODO: complete docstring
+def valuate_translation(data: List[str], max_length: int = 256) -> float:
+    """_summary_
+
+    Args:
+        data (List[str]): _description_
+        max_length (int, optional): _description_. Defaults to 256.
+
+    Returns:
+        float: _description_
+    """
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
     tokenizer, model = translate_model(device)
-    print('Done model')
-    predict = infer(data, tokenizer, model, max_length, device)
+    prediction = infer(data, tokenizer, model, max_length, device)
 
-    score = sum([bleuScore(can, infer) for can, infer in predict]) / len(predict)
+    score = sum([cal_bleu(can, infer)
+                for can, infer in prediction]) / len(prediction)
     return score
