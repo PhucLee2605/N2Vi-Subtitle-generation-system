@@ -1,7 +1,9 @@
 from flask import request, Blueprint, render_template, flash, redirect, send_file, jsonify
 from .applications import enhance, recognize, translate
 from .applications.utils import preprocess, postprocess, crawl
+from datetime import datetime
 import xml.etree.ElementTree as ET
+from hashlib import sha256
 import os
 import torch
 
@@ -40,6 +42,9 @@ def run_translation():
             file_name = request.form['name'].split('.')[0]
             file_extension = request.form['name'].split('.')[-1]
 
+            time = datetime.now().strftime("%Y%m%d%H%M%S")
+            file_name = sha256(f"{file_name}{time}".encode()).hexdigest()
+
             TEMP_TXT_OUTPUT_FILE = f'{pretemp}/database/translate/text/{file_name}_vi.txt'
 
         else:
@@ -74,13 +79,13 @@ def run_translation():
         with open(TEMP_XML_FILE, "w", encoding="utf-8") as f:
             xml_data = ET.tostring(xml).decode("utf8")
             f.write(xml_data)
-            preprocess.xml_to_srt(xml_data, TEMP_SRT_FILE)
+            postprocess.xml_to_srt(xml_data, TEMP_SRT_FILE)
 
         txtpath = f'/download/{TEMP_TXT_OUTPUT_FILE}'
         xmlpath = f'/download/{TEMP_XML_FILE}'
         srtpath = f'/download/{TEMP_SRT_FILE}'
 
-        return jsonify({"text": text_data,
+        return jsonify({"text": xml_data,
                         "txt_href": txtpath,
                         "xml_href": xmlpath,
                         "srt_href": srtpath})
@@ -99,8 +104,12 @@ def run_translation():
         ptranslate = [p[4:] for p in TRANSLATE_MODEL.infer(ptags, 'xml')]
         text_data = ' '.join([p.strip() for p in ptranslate])
 
-        for i in range(len(srt)):
-            srt_trans = text.replace(srt[i], ptranslate[i])
+        lines = text.strip().splitlines()
+
+        for i in range(2, len(lines), 4):
+            lines[i] = ptranslate[int((i-2)/4)]
+
+        srt_trans = '\n'.join(lines)
 
         with open(TEMP_TXT_OUTPUT_FILE, 'w', encoding="utf-8") as f:
             f.write(text_data)
@@ -108,7 +117,7 @@ def run_translation():
         with open(TEMP_SRT_FILE, "w", encoding="utf-8") as f:
             f.write(srt_trans)
 
-        return jsonify({"text": text_data,
+        return jsonify({"text": srt_trans,
                         "txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}',
                         "srt_href": f'/download/{TEMP_SRT_FILE}'})
 
@@ -141,6 +150,9 @@ def run_recognition():
         if raw_audio:
             print('[INFO] File received')
             audio_name = ''.join(raw_audio.filename.split('.')[:-1])
+
+            time = datetime.now().strftime("%Y%m%d%H%M%S")
+            audio_name = sha256(f"{audio_name}{time}".encode()).hexdigest()
 
             audio_temp_dir = f'{pretemp}/database/recognize/audio/temp_{raw_audio.filename}'
             raw_audio.save(audio_temp_dir)
@@ -205,8 +217,8 @@ def get_transcribe():
         with open(srt_output, 'w', encoding="utf-8") as f:
             for index in range(len(predict)):
                 f.write(f"{index + 1}\n")
-                f.write(f"{lines[index]['timestamp'][0]} --> {lines[index]['timestamp'][1]}\n")
-                f.write(f"{predict[index]['text']}\n\n")
+                f.write(f"{stack_words[index]['timestamp'][0]} --> {stack_words[index]['timestamp'][1]}\n")
+                f.write(f"{predict[index][4:]}\n\n")
 
         return jsonify({"srt_href": f'/download/{srt_output}'})
 

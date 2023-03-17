@@ -90,6 +90,7 @@ def stack_chunks(chunks: List[dict], length=20, threshold=2000) -> List[str]:
             scripts.append({'text': line.strip(), 'timestamp': [format_time(begin_time), format_time(line_end_time)]})
             line = chunks[index]['text'] + " "
             begin_time = chunks[index]['timestamp'][0] * 1000
+            line_end_time = chunks[index]['timestamp'][1] * 1000
         else:
             line += chunks[index]['text'] + " "
             line_end_time = chunks[index]['timestamp'][1] * 1000
