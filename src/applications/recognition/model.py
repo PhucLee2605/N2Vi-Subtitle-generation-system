@@ -8,7 +8,7 @@ from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 cfg = config.load(os.path.join(os.path.dirname(__file__),"recog_config.yaml"))
 
 
-def enhance_pipeline(name: str = None, device="cpu") -> pipeline:
+def recog_pipeline(name: str = None, device="cpu") -> pipeline:
     """ create enhnacement pipeline with pretrained model
 
     Args:
