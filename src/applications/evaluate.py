@@ -2,17 +2,25 @@ import os
 import time
 import json
 import string
+from typing import Callable
 from tqdm import tqdm
 from pymediainfo import MediaInfo
 import warnings
 import recognize
 import enhance
+
 from .utils import preprocess
-from .recognition.metric import cal_average_WER, cal_single_WER
+from .recognition.metric import cal_wer_score
 
 warnings.filterwarnings("ignore")
 
-def measure_time_exc(enhance_file: str, func, **kargs):
+def measure_time_exc(enhance_file: str, func: Callable, **kargs) -> None:
+    """ Used to measure time execution of passed function.
+
+    Args:
+        enhance_file (str): file used to measure time execution.
+        func (Callable): Function that will be measured
+    """
     print(f"Measuring {func.__name__} module...")
     st = time.time()
     try:
@@ -37,7 +45,15 @@ def measure_time_exc(enhance_file: str, func, **kargs):
     print(f"Total execution time: {elapses_time}s")
 
 
-def eval_speech_recog(eval_data_dir: str, gt_value_file: str, lang: str, enh: bool):
+def eval_speech_recog(eval_data_dir: str, gt_value_file: str, lang: str, enh: bool) -> None:
+    """ Used to evaluate speech recognition model
+
+    Args:
+        eval_data_dir (str): directory that contain files that will be used to evaluate
+        gt_value_file (str): true subtitle file
+        lang (str): "en" for english evaluation. "vi" for Vietnamese evaluation
+        enh (bool): either enhance speech before evaluate or not
+    """    
     assert os.path.isfile(gt_value_file)
     assert os.path.isdir(eval_data_dir)
     enhance_model = enhance.Enhancement()
@@ -47,16 +63,16 @@ def eval_speech_recog(eval_data_dir: str, gt_value_file: str, lang: str, enh: bo
     with open(gt_value_file, "r") as f:
         gt_values = json.load(f)
         for file in tqdm(os.listdir(eval_data_dir)):
-            speech, sr = preprocess.load_audio_file(os.path.join(eval_data_dir[:-1], file))
+            speech, sr = preprocess.load_audio_file(os.path.join(eval_data_dir[:-1], file),16000)
             enhance_audio, _ = enhance_model(speech, sr)
 
             pred = recognize_model.infer(enhance_audio)["text"].lower().translate(str.maketrans('', '', string.punctuation))
             gt = gt_values[lang][os.path.splitext(file)[0]].lower().translate(str.maketrans('', '', string.punctuation))
-            print(f"[EVAL] WER: {cal_single_WER(prediction=[pred], reference=[gt])}")
+            print(f"[EVAL] WER: {cal_wer_score(prediction=[pred], reference=[gt])}")
             preds.append(pred)
             gts.append(gt)
 
-        avg_wer = cal_average_WER(predictions=preds, references=gts)
+        avg_wer = cal_wer_score(predictions=preds, references=gts)
 
         print(f"""
                     ####################/n

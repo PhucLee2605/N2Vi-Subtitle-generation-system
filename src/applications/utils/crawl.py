@@ -1,12 +1,22 @@
 from pytube import YouTube
-import ffmpeg
 import os
 import json
 import urllib
+from typing import Any
 from hashlib import sha256
 
 
-def download_audio(url, path):
+#TODO complete docstring
+def download_audio(url: str, path: str) -> Any:
+    """_summary_
+
+    Args:
+        url (str): _description_
+        path (str): _description_
+
+    Returns:
+        Any: _description_
+    """
     yt = YouTube(url)
 
     t = yt.streams.filter(only_audio=True)
@@ -16,7 +26,15 @@ def download_audio(url, path):
     return name_encrypted
 
 
-def crawlData(channelid, api, num):
+#TODO complete docstring and type hint
+def crawl_data(channelid, api, num) -> None:
+    """_summary_
+
+    Args:
+        channelid (_type_): _description_
+        api (_type_): _description_
+        num (_type_): _description_
+    """
     nextPage = None
     filename = 0
     while True:
@@ -27,7 +45,6 @@ def crawlData(channelid, api, num):
                 url = f"https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&pageToken={nextPage}&channelId={channelid}&maxResults={num}&key={api}"
             googleResponse = urllib.request.urlopen(url)
             youtubeResponse = json.loads(googleResponse.read())
-
 
         elif num >= 50:
             if nextPage == None:
@@ -46,35 +63,45 @@ def crawlData(channelid, api, num):
         for item in youtubeResponse['items']:
             id = item['id']['videoId']
             vidPath = f"https://www.youtube.com/watch?v={id}"
-            extractInfo(str(filename).zfill(3), vidPath)
+            extract_info(str(filename).zfill(3), vidPath)
 
             filename += 1
 
 
-def extractInfo(filename, link, database="data"):
-    audioPath = os.path.join(database, "audio")
-    viCapPath = os.path.join(database, "caption/vi")
-    enCapPath = os.path.join(database, "caption/en")
+#TODO complete docstring and type hint
+def extract_info(filename, link, database="data") -> None:
+    """_summary_
+
+    Args:
+        filename (_type_): _description_
+        link (_type_): _description_
+        database (str, optional): _description_. Defaults to "data".
+    """
+    audio_path = os.path.join(database, "audio")
+    vi_cap_path = os.path.join(database, "caption/vi")
+    en_cap_path = os.path.join(database, "caption/en")
 
     if not os.path.isdir(database) or not os.path.exists(database):
-        os.makedirs(audioPath)
-        os.makedirs(viCapPath)
-        os.makedirs(enCapPath)
+        os.makedirs(audio_path)
+        os.makedirs(vi_cap_path)
+        os.makedirs(en_cap_path)
 
     yt = YouTube(link)
     try:
-        viCap = yt.captions['vi']
+        vi_cap = yt.captions['vi']
     except:
-        viCap = None
+        vi_cap = None
     try:
-        enCap = yt.captions['en']
+        en_cap = yt.captions['en']
     except:
-        enCap = None
+        en_cap = None
 
     audio = yt.streams.filter(only_audio=True, file_extension='mp3').first()
 
-    0 if viCap == None else viCap.download(filename, srt=False, output_path=viCapPath)
+    0 if vi_cap == None else vi_cap.download(filename,
+                                             srt=False,
+                                             output_path=vi_cap_path)
 
-    enCap.download(filename, srt=False, output_path=enCapPath)
-    audio.download(output_path=audioPath, filename=f'{filename}.mp3')
-    print(f'Load {filename} succesfully')
+    en_cap.download(filename, srt=False, output_path=en_cap_path)
+    audio.download(output_path=audio_path, filename=f'{filename}.mp3')
+    print(f'[INFO] Load {filename} succesfully')
