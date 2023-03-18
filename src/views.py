@@ -217,7 +217,7 @@ def get_transcribe():
         enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr)
         transcription = RECOGNIZE_MODEL.infer(enhance_speech)
 
-        stack_words = postprocess.stack_chunks(transcription['chunks'])
+        stack_words = postprocess.process_chunks(transcription['chunks'])
 
         lines = ['en: ' + line['text'] for line in stack_words]
         predict = TRANSLATE_MODEL.infer(lines, 'xml')
