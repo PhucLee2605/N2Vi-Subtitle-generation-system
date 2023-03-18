@@ -217,17 +217,19 @@ def get_transcribe():
         enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr)
         transcription = RECOGNIZE_MODEL.infer(enhance_speech)
 
-        stack_words = postprocess.process_chunks(transcription['chunks'])
-
-        lines = ['en: ' + line['text'] for line in stack_words]
+        lines = ['en: ' + line['text'] for line in transcription]
         predict = TRANSLATE_MODEL.infer(lines, 'xml')
+
+        phrases = postprocess.process_long_text(predict)
 
         srt_output = f'{pretemp}/database/tubescribe/srt/{audio_name}.srt'
         with open(srt_output, 'w', encoding="utf-8") as f:
             for index in range(len(predict)):
                 f.write(f"{index + 1}\n")
-                f.write(f"{stack_words[index]['timestamp'][0]} --> {stack_words[index]['timestamp'][1]}\n")
-                f.write(f"{predict[index][4:]}\n\n")
+                start_time = transcription[index]['timestamp'][0] * 1000
+                end_time = transcription[index]['timestamp'][1] * 1000
+                f.write(f"{postprocess.format_time(int(start_time))} --> {postprocess.format_time(int(end_time))}\n")
+                f.write(f"{phrases[index][4:]}\n\n")
 
         return jsonify({"srt_href": f'/download/{srt_output}'})
 

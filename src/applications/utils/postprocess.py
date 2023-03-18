@@ -70,7 +70,7 @@ def export_xml(data: Dict) -> str:
 
 
 #TODO complete docstring
-def process_chunks(chunks, max_line_length=80):
+def process_long_text(lines, max_line_length=80):
     """_summary_
 
     Args:
@@ -82,12 +82,12 @@ def process_chunks(chunks, max_line_length=80):
     """
     result = list()
 
-    for phrase in chunks:
+    for line in lines:
         # Process text
-        length = len(phrase['text'])
+        length = len(line)
         if length > max_line_length:
             middle_str = length // 2
-            words = phrase['text'].split(' ')
+            words = line.split(' ')
 
             first_part = ""
             for word in range(len(words)):
@@ -97,16 +97,7 @@ def process_chunks(chunks, max_line_length=80):
                     end_part = words[word:]
                     break
 
-            final_text = first_part.strip() + '\n' + ' '.join(end_part)
+            result.append(first_part.strip() + '\n' + ' '.join(end_part))
         else:
-            final_text = phrase['text']
-
-        # Process time
-        start_time = int(phrase['timestamp'][0] * 1000)
-        end_time = int(phrase['timestamp'][1] * 1000)
-
-        result.append(
-            {'text': final_text.strip(),
-             'timestamp': [format_time(start_time), format_time(end_time)]})
-
+            result.append(line)
     return result
