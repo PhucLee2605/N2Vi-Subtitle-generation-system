@@ -2,7 +2,7 @@ import os
 from typing import Any
 import config_with_yaml as config
 from transformers import pipeline
-from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
+from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC, WhisperProcessor, WhisperForConditionalGeneration
 
 
 cfg = config.load(os.path.join(os.path.dirname(__file__),"recog_config.yaml"))
@@ -20,7 +20,7 @@ def recog_pipeline(name: str = None, device="cpu") -> pipeline:
     """
     if not name:
         name = cfg.getProperty("model_name")
-    return pipeline(tokenizer=name, model=name, device=device)
+    return pipeline("automatic-speech-recognition",tokenizer=name, model=name, device=device)
 
 
 def tokenizer(tokenizer_name: str = None) -> Wav2Vec2Processor:
