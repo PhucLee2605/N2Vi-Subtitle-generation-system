@@ -1,6 +1,6 @@
 from flask import request, Blueprint, render_template, flash, redirect, send_file, jsonify
 from .applications import enhance, recognize, translate
-from .applications.utils import preprocess, postprocess, crawl
+from .applications.utils import preprocess, postprocess, crawl, util
 from datetime import datetime
 import xml.etree.ElementTree as ET
 from hashlib import sha256
@@ -32,7 +32,13 @@ def translate():
 @views.route('/translated', methods=['POST'])
 def run_translation():
     file_extension = None
+    TEMP_XML_DIR = f"{pretemp}/database/translate/xml"
+    TEMP_SRT_DIR = f"{pretemp}/database/translate/srt"
+    TEMP_TXT_DIR = f"{pretemp}/database/translate/text"
 
+    util.create_dir(os.path.dirname(TEMP_XML_DIR))
+    util.create_dir(os.path.dirname(TEMP_SRT_DIR))
+    util.create_dir(os.path.dirname(TEMP_TXT_DIR))
     if request.method == "POST":
         print('[INFO] POST')
 
@@ -45,8 +51,7 @@ def run_translation():
             time = datetime.now().strftime("%Y%m%d%H%M%S")
             file_name = sha256(f"{file_name}{time}".encode()).hexdigest()
 
-            TEMP_TXT_OUTPUT_FILE = f'{pretemp}/database/translate/text/{file_name}_vi.txt'
-
+            TEMP_TXT_OUTPUT_FILE = f'{TEMP_TXT_DIR}/{file_name}_vi.txt'
         else:
             print("[ERROR] Error translating")
             flash('Content conflict', category='error')
@@ -56,8 +61,8 @@ def run_translation():
         xml = None
         try:
             xml = ET.fromstring(text)
-            TEMP_XML_FILE = f'{pretemp}/database/translate/xml/{file_name}_vi.xml'
-            TEMP_SRT_FILE = f'{pretemp}/database/translate/srt/{file_name}_vi.srt'
+            TEMP_XML_FILE = f'{TEMP_XML_DIR}/{file_name}_vi.xml'
+            TEMP_SRT_FILE = f'{TEMP_SRT_DIR}/{file_name}_vi.srt'
             print("[INFO] XML parse successfully")
         except:
             print("[ERROR] XML parse error")
@@ -93,7 +98,7 @@ def run_translation():
     elif file_extension == 'srt':
         try:
             srt = preprocess.extract_srt(text)
-            TEMP_SRT_FILE = f'{pretemp}/database/translate/srt/{file_name}_vi.srt'
+            TEMP_SRT_FILE = f'{TEMP_SRT_DIR}/{file_name}_vi.srt'
             print("[INFO] SRT parse successfully")
         except:
             print("[ERROR] SRT parse error")
@@ -159,19 +164,23 @@ def run_recognition():
             try:
                 speech, sr = preprocess.load_audio_file(audio_temp_dir, 16000)
             except:
-                return jsonify({"text": "Error: File not supported"}), 400 #TODO check web error for file not support
+                return jsonify({"text": "Error: File not supported"}), 400
 
-            enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr, device=DEVICE)
-            transcription = RECOGNIZE_MODEL.infer(enhance_speech,
-                                                  device=DEVICE)
+            enhance_speech, sr = ENHANCE_MODEL.infer(speech, sr)
+            transcription = RECOGNIZE_MODEL.infer(enhance_speech, sr)
 
             txt_audio_output = f"{pretemp}/database/recognize/text/{audio_name}.txt"
+            util.create_dir(os.path.dirname(txt_audio_output))
 
             with open(txt_audio_output, 'w', encoding="utf-8") as f:
                 f.write(transcription['text'])
 
             xml_audio_output = f'{pretemp}/database/recognize/xml/{audio_name}.xml'
             srt_audio_output = f'{pretemp}/database/recognize/srt/{audio_name}.srt'
+
+            util.create_dir(os.path.dirname(xml_audio_output))
+            util.create_dir(os.path.dirname(srt_audio_output))
+
             with open(xml_audio_output, 'w', encoding="utf-8") as f:
                 xml_data = postprocess.export_xml(transcription)
                 f.write(xml_data)

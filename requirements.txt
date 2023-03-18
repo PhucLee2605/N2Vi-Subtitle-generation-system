@@ -2,7 +2,7 @@ transformers
 config-with-yaml
 speechbrain
 torch
-torchaudio
+torchaudio== 0.13.1
 torchtext
 tqdm
 librosa==0.9.2

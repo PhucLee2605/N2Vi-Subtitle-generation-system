@@ -31,7 +31,7 @@ def load_audio_file(audio: str, output_sr: int = 16000) -> Tuple[Any, int]:
             speech, sr = ls.load(audio, sr=output_sr)
 
     #! check if audio is loaded. If not, means that input file is not supported
-    if not speech:
+    if speech is None:
         print("[ERROR] File is not supproted")
         raise
 

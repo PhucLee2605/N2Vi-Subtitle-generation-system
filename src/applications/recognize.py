@@ -60,20 +60,21 @@ class Recognition():
         """
         if lang == "vi":
             self.recog_model = recog_pipeline(cfg.getProperty("vi_model_name"),
-                                                device)
+                                              device)
         elif lang == "en":
             self.recog_model = recog_pipeline(cfg.getProperty("en_model_name"),
-                                                device)
+                                              device)
         self.device = device
         self.chunk_length = chunk_length
 
-    def infer(self, audio: Any) -> Callable[[], dict]:
+    def infer(self, audio: Any, sampling_rate: int = 16000) -> Callable[[], dict]:
         """ Infering speech recognition
 
         Args:
             audio (Any): Loaded audio to infer
+            sampling_rate (int): input audio's sampling rate. Default to 16000
 
         Returns:
             Callable[[], dict]: speech_recognize function
         """
-        return speech_recognize(audio, self.recog_model, self.chunk_length, self.device)
+        return speech_recognize(audio=audio, recog_model=self.recog_model, chunk_length=self.chunk_length, device=self.device, sampling_rate=sampling_rate)
