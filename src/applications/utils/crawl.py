@@ -96,12 +96,15 @@ def extract_info(filename, link, database="data") -> None:
     except:
         en_cap = None
 
-    audio = yt.streams.filter(only_audio=True, file_extension='mp3').first()
+    audio = yt.streams.filter(only_audio=True).first()
 
     0 if vi_cap == None else vi_cap.download(filename,
                                              srt=False,
                                              output_path=vi_cap_path)
 
-    en_cap.download(filename, srt=False, output_path=en_cap_path)
-    audio.download(output_path=audio_path, filename=f'{filename}.mp3')
-    print(f'[INFO] Load {filename} succesfully')
+    0 if en_cap == None else en_cap.download(filename,
+                                             srt=False,
+                                             output_path=en_cap_path)
+
+    audio.download(output_path=audio_path, filename=f'{filename}.mp4')
+    print(f'[INFO] Crawl {filename} succesfully')
