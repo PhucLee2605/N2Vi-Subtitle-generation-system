@@ -70,29 +70,43 @@ def export_xml(data: Dict) -> str:
 
 
 #TODO complete docstring
-def stack_chunks(chunks: List[dict], length=20, threshold=2000) -> List[str]:
+def process_chunks(chunks, max_line_length=80):
     """_summary_
 
     Args:
         chunks (List[dict]): _description_
-        length (int, optional): _description_. Defaults to 20.
-        threshold (int, optional): _description_. Defaults to 2000.
+        max_line_length (int, optional): _description_. Defaults to 80.
 
     Returns:
         List[str]: _description_
     """
-    begin_time = chunks[0]['timestamp'][0] * 1000
-    line_end_time = chunks[0]['timestamp'][1] * 1000
-    scripts = list()
-    line = ""
-    for index in range(len(chunks)):
-        if chunks[index]['timestamp'][0] * 1000 - line_end_time > threshold or len(line) > length:
-            scripts.append({'text': line.strip(), 'timestamp': [format_time(begin_time), format_time(line_end_time)]})
-            line = chunks[index]['text'] + " "
-            begin_time = chunks[index]['timestamp'][0] * 1000
-            line_end_time = chunks[index]['timestamp'][1] * 1000
-        else:
-            line += chunks[index]['text'] + " "
-            line_end_time = chunks[index]['timestamp'][1] * 1000
+    result = list()
 
-    return scripts
+    for phrase in chunks:
+        # Process text
+        length = len(phrase['text'])
+        if length > max_line_length:
+            middle_str = length // 2
+            words = phrase['text'].split(' ')
+
+            first_part = ""
+            for word in range(len(words)):
+                if len(first_part) < middle_str:
+                    first_part += words[word] + ' '
+                else:
+                    end_part = words[word:]
+                    break
+
+            final_text = first_part.strip() + '\n' + ' '.join(end_part)
+        else:
+            final_text = phrase['text']
+
+        # Process time
+        start_time = int(phrase['timestamp'][0] * 1000)
+        end_time = int(phrase['timestamp'][1] * 1000)
+
+        result.append(
+            {'text': final_text.strip(),
+             'timestamp': [format_time(start_time), format_time(end_time)]})
+
+    return result
