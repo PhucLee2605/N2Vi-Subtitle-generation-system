@@ -236,4 +236,8 @@ def get_transcribe():
 
 @views.route('/download/<path:filename>')
 def download(filename):
-    return send_file(filename, as_attachment=True)
+    try:
+        return send_file(filename, as_attachment=True)
+    #Colab
+    except:
+        return send_file('/' + filename, as_attachment=True)

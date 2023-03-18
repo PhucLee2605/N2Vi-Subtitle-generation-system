@@ -20,7 +20,7 @@ def recog_pipeline(name: str = None, device="cpu") -> pipeline:
     """
     if not name:
         name = cfg.getProperty("model_name")
-    return pipeline("automatic-speech-recognition", tokenizer=name, model=name, device=0 if device == "cuda" else 0)
+    return pipeline("automatic-speech-recognition", tokenizer=name, model=name, device=device)
 
 
 def tokenizer(tokenizer_name: str = None) -> Wav2Vec2Processor:

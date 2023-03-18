@@ -43,7 +43,8 @@ def speech_recognize(audio: Any, recog_model: Any, chunk_length: int = CHUNK_LEN
     with torch.no_grad():
         transcription = recog_model(ds["speech"],
                                     chunk_length_s=chunk_length,
-                                    return_timestamps=True)
+                                    return_timestamps=True,
+                                    ignore_warning=True)
 
     print("[INFO] Finished speech recognition")
     return transcription
