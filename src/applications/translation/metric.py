@@ -22,7 +22,7 @@ def cal_bleu(sen1: str, sen2: str) -> float:
 
 
 #TODO: complete docstring
-def valuate_translation(data: List[str], max_length: int = 256) -> float:
+def valuate_translation(data: List[str], ground_truth: List[str], max_length: int = 256) -> float:
     """_summary_
 
     Args:
@@ -37,6 +37,6 @@ def valuate_translation(data: List[str], max_length: int = 256) -> float:
     tokenizer, model = translate_model(device)
     prediction = infer(data, tokenizer, model, max_length, device)
 
-    score = sum([cal_bleu(can, infer)
-                for can, infer in prediction]) / len(prediction)
+    score = sum([cal_bleu(prediction[index], ground_truth[index])
+                for index in range(len(prediction))]) / len(prediction)
     return score
