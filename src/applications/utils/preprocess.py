@@ -195,3 +195,12 @@ def extract_srt(str: str):
     for i in range(0, len(lines), 4):
         results.append(lines[i+2])
     return results
+
+
+def gaussian_noise(audio, noiseSigma = 0.1, noiseAmplitude = 5):
+    Nsamples = len(audio[0])
+    noise = noiseAmplitude * np.random.normal(0, noiseSigma, Nsamples)
+    
+    audio_noise = audio[0] + torch.Tensor(noise)
+    audio_noise = audio_noise.reshape(1, len(audio_noise))
+    return audio_noise
