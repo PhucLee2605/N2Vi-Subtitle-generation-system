@@ -134,7 +134,11 @@
                 if (response['srt_href']){
                     $(srtId).attr("href", response['srt_href'])
                     $(srtId).attr("target", "_blank")
+                } else {
+                    $(srtId).removeAttr("href")
+                    $(srtId).removeAttr("target")
                 }
+                $(name).val('');
             }).fail(function() {
                 $(destElem).text("Could not contact server");
             });

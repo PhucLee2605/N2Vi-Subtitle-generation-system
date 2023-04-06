@@ -160,18 +160,22 @@ def is_srt_format(string: str) -> bool:
     Returns:
         bool: True if input string is in srt and False if it is not
     """
-    lines = string.strip().split('\n')
-    for i in range(0, len(lines), 4):
-        if not lines[i].isdigit():
+    blocks = string.strip().split('\n\n')
+    for block in blocks:
+        lines = block.split('\n')
+
+        if 3 > len(lines) > 5:
+            print(len(lines))
             return False
-        timecode = lines[i+1].split(' --> ')
+
+        if not lines[0].isdigit():
+            return False
+        timecode = lines[1].split(' --> ')
         if len(timecode) != 2:
             return False
         for tc in timecode:
             if not re.match(r'\d{2}:\d{2}:\d{2},\d{3}', tc):
                 return False
-        if not lines[i+2].strip():
-            return False
     return True
 
 
@@ -190,10 +194,11 @@ def extract_srt(str: str):
     """
     if not is_srt_format(str):
         raise ValueError('Not a valid SRT file')
-    lines = str.strip().split('\n')
+    blocks = str.strip().split('\n\n')
     results = list()
-    for i in range(0, len(lines), 4):
-        results.append(lines[i+2])
+    for block in blocks:
+        lines = block.split('\n')
+        results.append('\n'.join(lines[2:]))
     return results
 
 
@@ -219,5 +224,5 @@ def prepare_database():
     #tubescribe
     os.makedirs('src/database/tubescribe/srt', exist_ok=True)
     os.makedirs('src/database/tubescribe/audio', exist_ok=True)
-
+    os.makedirs('src/database/tubescribe/xml', exist_ok=True)
     print('[INFO] Database preparation successfully')

@@ -82,7 +82,7 @@ def run_translation():
             f.write(text_data)
 
         with open(TEMP_XML_FILE, "w", encoding="utf-8") as f:
-            xml_data = ET.tostring(xml).decode("utf8")
+            xml_data = ET.tostring(xml).decode("utf-8")
             f.write(xml_data)
             postprocess.xml_to_srt(xml_data, TEMP_SRT_FILE)
 
@@ -106,15 +106,20 @@ def run_translation():
             return redirect("/translate")
 
         ptags = [f"{lang}: " + p.strip() for p in srt]
-        ptranslate = [p[4:] for p in TRANSLATE_MODEL.infer(ptags, 'xml')]
+        ptranslate = TRANSLATE_MODEL.infer(ptags)
         text_data = ' '.join([p.strip() for p in ptranslate])
 
-        lines = text.strip().splitlines()
+        blocks = text.split('\n\n')
 
-        for i in range(2, len(lines), 4):
-            lines[i] = ptranslate[int((i-2)/4)]
+        mod_blocks = list()
+        for index in range(len(ptranslate)):
+            block = blocks[index]
 
-        srt_trans = '\n'.join(lines)
+            lines = block.split('\n')
+            new_block = '\n'.join([lines[0], lines[1], ptranslate[index]])
+            mod_blocks.append(new_block)
+
+        srt_trans = '\n\n'.join(mod_blocks)
 
         with open(TEMP_TXT_OUTPUT_FILE, 'w', encoding="utf-8") as f:
             f.write(text_data)
@@ -225,7 +230,7 @@ def get_transcribe():
             predict = TRANSLATE_MODEL.infer(lines, 'xml')
 
         else:
-            xml_path = os.path.join(f'{pretemp}/database/tubescribe/xml', f'{audio_name}.xml')
+            xml_path = os.path.join(f'{pretemp}/database/tubescribe/xml', f'{audio_name} (en).xml')
             with open(xml_path, 'r') as f:
                 try:
                     xml = ET.fromstring(f.read())
