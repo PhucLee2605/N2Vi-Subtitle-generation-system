@@ -204,3 +204,20 @@ def gaussian_noise(audio, noiseSigma = 0.1, noiseAmplitude = 5):
     audio_noise = audio[0] + torch.Tensor(noise)
     audio_noise = audio_noise.reshape(1, len(audio_noise))
     return audio_noise
+
+def prepare_database():
+    os.makedirs('src/database/recognize/audio', exist_ok=True)
+    os.makedirs('src/database/recognize/srt', exist_ok=True)
+    os.makedirs('src/database/recognize/text', exist_ok=True)
+    os.makedirs('src/database/recognize/xml', exist_ok=True)
+
+    #translate
+    os.makedirs('src/database/translate/srt', exist_ok=True)
+    os.makedirs('src/database/translate/xml', exist_ok=True)
+    os.makedirs('src/database/translate/text', exist_ok=True)
+
+    #tubescribe
+    os.makedirs('src/database/tubescribe/srt', exist_ok=True)
+    os.makedirs('src/database/tubescribe/audio', exist_ok=True)
+
+    print('[INFO] Database preparation successfully')

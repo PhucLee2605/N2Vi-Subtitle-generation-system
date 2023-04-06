@@ -18,12 +18,17 @@ def download_audio(url: str, path: str) -> Any:
         Any: _description_
     """
     yt = YouTube(url)
-
-    t = yt.streams.filter(only_audio=True)
-
     name_encrypted = sha256(yt.streams[0].title.encode('utf-8')).hexdigest()
-    t[0].download(filename=f"{name_encrypted}.mp4", output_path=path)
-    return name_encrypted
+    try:
+        en_cap = yt.captions['en']
+        en_cap.download(name_encrypted,
+                        srt=False,
+                        output_path=os.path.join(path, 'xml'))
+        return name_encrypted, 'xml'
+    except:
+        t = yt.streams.filter(only_audio=True)
+        t[0].download(filename=f"{name_encrypted}.mp4", output_path=os.path.join(path, 'audio'))
+        return name_encrypted, 'mp4'
 
 
 #TODO complete docstring and type hint

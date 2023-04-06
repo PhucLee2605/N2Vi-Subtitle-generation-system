@@ -18,6 +18,7 @@ ENHANCE_MODEL = enhance.Enhancement(device=DEVICE)
 RECOGNIZE_MODEL = recognize.Recognition(device=DEVICE)
 TRANSLATE_MODEL = translate.Translation(device=DEVICE)
 
+preprocess.prepare_database()
 
 @views.route('/')
 def home():
@@ -58,7 +59,6 @@ def run_translation():
             return redirect("/translate")
 
     if file_extension == 'xml':
-        xml = None
         try:
             xml = ET.fromstring(text)
             TEMP_XML_FILE = f'{TEMP_XML_DIR}/{file_name}_vi.xml'
@@ -207,18 +207,34 @@ def get_transcribe():
     if request.method == 'POST':
         url = request.form['url']
         try:
-            audio_name = crawl.download_audio(url, 'src/database/tubescribe/audio')
+            audio_name, typp = crawl.download_audio(url, 'src/database/tubescribe')
         except:
             return jsonify('Error when downloading from provided url'), 404
 
-        audio_path = os.path.join(f'{pretemp}/database/tubescribe/audio', f'{audio_name}.mp4')
 
-        speech, sr = preprocess.load_audio_file(audio_path, 16000)
-        enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr)
-        transcription = RECOGNIZE_MODEL.infer(enhance_speech)
 
-        lines = ['en: ' + line['text'] for line in transcription['chunks']]
-        predict = TRANSLATE_MODEL.infer(lines, 'xml')
+        if typp == 'mp4':
+            audio_path = os.path.join(f'{pretemp}/database/tubescribe/audio', f'{audio_name}.mp4')
+
+            speech, sr = preprocess.load_audio_file(audio_path, 16000)
+            enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr)
+            transcription = RECOGNIZE_MODEL.infer(enhance_speech)
+
+
+            lines = ['en: ' + line['text'] for line in transcription['chunks']]
+            predict = TRANSLATE_MODEL.infer(lines, 'xml')
+
+        else:
+            xml_path = os.path.join(f'{pretemp}/database/tubescribe/xml', f'{audio_name}.xml')
+            with open(xml_path, 'r') as f:
+                try:
+                    xml = ET.fromstring(f.read())
+                except:
+                    raise "Parse XML fail in tubescribe"
+
+            tags = xml.findall(".//p")
+            ptags = ["en: " + tag.text.strip() for tag in tags]
+            predict = [p[4:] for p in TRANSLATE_MODEL.infer(ptags, 'xml')]
 
         phrases = postprocess.process_long_text(predict)
 
