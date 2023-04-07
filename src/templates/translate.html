@@ -121,7 +121,6 @@
                 name: $(name).val(),
                 lang: $(lang).val()
             }).done(function(response) {
-                $(destElem).val(response['text'])
                 $(txtId).attr("href", response['txt_href'])
                 $(txtId).attr("target", "_blank")
                 if (response['xml_href']){
@@ -134,9 +133,15 @@
                 if (response['srt_href']){
                     $(srtId).attr("href", response['srt_href'])
                     $(srtId).attr("target", "_blank")
+                    $.get(response['srt_href'], function(data) {
+                        $(destElem).val(data);
+                    });
                 } else {
                     $(srtId).removeAttr("href")
                     $(srtId).removeAttr("target")
+                    $.get(response['txt_href'], function(data) {
+                        $(destElem).val(data);
+                    });
                 }
                 $(name).val('');
             }).fail(function() {
