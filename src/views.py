@@ -90,8 +90,7 @@ def run_translation():
         xmlpath = f'/download/{TEMP_XML_FILE}'
         srtpath = f'/download/{TEMP_SRT_FILE}'
 
-        return jsonify({"text": xml_data,
-                        "txt_href": txtpath,
+        return jsonify({"txt_href": txtpath,
                         "xml_href": xmlpath,
                         "srt_href": srtpath})
 
@@ -127,8 +126,7 @@ def run_translation():
         with open(TEMP_SRT_FILE, "w", encoding="utf-8") as f:
             f.write(srt_trans)
 
-        return jsonify({"text": srt_trans,
-                        "txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}',
+        return jsonify({"txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}',
                         "srt_href": f'/download/{TEMP_SRT_FILE}'})
 
     else:
@@ -137,8 +135,7 @@ def run_translation():
         with open(TEMP_TXT_OUTPUT_FILE, 'w', encoding="utf-8") as f:
             f.write(result)
 
-        return jsonify({"text": result,
-                        "txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}'})
+        return jsonify({"txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}'})
 
 
 # RECOGNIZE
