@@ -4,9 +4,12 @@ from .applications.utils import preprocess, postprocess, crawl, util
 from datetime import datetime
 import xml.etree.ElementTree as ET
 from hashlib import sha256
+import librosa
 import os
 import torch
+import time
 
+start_activate = time.time()
 
 views = Blueprint('views', __name__)
 
@@ -19,6 +22,8 @@ RECOGNIZE_MODEL = recognize.Recognition(device=DEVICE)
 TRANSLATE_MODEL = translate.Translation(device=DEVICE)
 
 preprocess.prepare_database()
+
+print(f'[INFO] The system took {int(time.time() - start_activate)}s to start up')
 
 @views.route('/')
 def home():
@@ -49,8 +54,8 @@ def run_translation():
             file_name = request.form['name'].split('.')[0]
             file_extension = request.form['name'].split('.')[-1]
 
-            time = datetime.now().strftime("%Y%m%d%H%M%S")
-            file_name = sha256(f"{file_name}{time}".encode()).hexdigest()
+            date = datetime.now().strftime("%Y%m%d%H%M%S")
+            file_name = sha256(f"{file_name}{date}".encode()).hexdigest()
 
             TEMP_TXT_OUTPUT_FILE = f'{TEMP_TXT_DIR}/{file_name}_vi.txt'
         else:
@@ -90,8 +95,7 @@ def run_translation():
         xmlpath = f'/download/{TEMP_XML_FILE}'
         srtpath = f'/download/{TEMP_SRT_FILE}'
 
-        return jsonify({"text": xml_data,
-                        "txt_href": txtpath,
+        return jsonify({"txt_href": txtpath,
                         "xml_href": xmlpath,
                         "srt_href": srtpath})
 
@@ -127,8 +131,7 @@ def run_translation():
         with open(TEMP_SRT_FILE, "w", encoding="utf-8") as f:
             f.write(srt_trans)
 
-        return jsonify({"text": srt_trans,
-                        "txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}',
+        return jsonify({"txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}',
                         "srt_href": f'/download/{TEMP_SRT_FILE}'})
 
     else:
@@ -137,8 +140,7 @@ def run_translation():
         with open(TEMP_TXT_OUTPUT_FILE, 'w', encoding="utf-8") as f:
             f.write(result)
 
-        return jsonify({"text": result,
-                        "txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}'})
+        return jsonify({"txt_href": f'/download/{TEMP_TXT_OUTPUT_FILE}'})
 
 
 # RECOGNIZE
@@ -151,6 +153,8 @@ def recognize():
 def run_recognition():
     print('[INFO] Recognizing speech')
     if request.method == 'POST':
+        start_recog_time = time.time()
+
         try:
             raw_audio = request.files.get('audio')
         except:
@@ -161,13 +165,14 @@ def run_recognition():
             print('[INFO] File received')
             audio_name = ''.join(raw_audio.filename.split('.')[:-1])
 
-            time = datetime.now().strftime("%Y%m%d%H%M%S")
-            audio_name = sha256(f"{audio_name}{time}".encode()).hexdigest()
+            date = datetime.now().strftime("%Y%m%d%H%M%S")
+            audio_name = sha256(f"{audio_name}{date}".encode()).hexdigest()
 
             audio_temp_dir = f'{pretemp}/database/recognize/audio/temp_{raw_audio.filename}'
             raw_audio.save(audio_temp_dir)
             try:
                 speech, sr = preprocess.load_audio_file(audio_temp_dir, 16000)
+                audio_duration = librosa.get_duration(filename=audio_temp_dir)
             except:
                 return jsonify({"text": "Error: File not supported"}), 400
 
@@ -191,6 +196,7 @@ def run_recognition():
                 f.write(xml_data)
                 postprocess.xml_to_srt(xml_data, srt_audio_output)
 
+            print(f'[INFO] Done audio recognition: audio-duration: {int(audio_duration)}s time-recog: {int(time.time() - start_recog_time)}s')
             return jsonify({"text": transcription['text'],
                             "txt_href": f'/download/{txt_audio_output}',
                             "xml_href": f'/download/{xml_audio_output}',
