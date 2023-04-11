@@ -35,7 +35,7 @@ def valuate_translation(data: List[str], ground_truth: List[str], max_length: in
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     tokenizer, model = translate_model('VietAI/envit5-translation', device=device)
-    prediction = infer(data, tokenizer, model, max_length, device)
+    prediction = infer(data, tokenizer, model, max_length, 'text', device)
 
     score = sum([cal_bleu(prediction[index], ground_truth[index])
                 for index in range(len(prediction))]) / len(prediction)
