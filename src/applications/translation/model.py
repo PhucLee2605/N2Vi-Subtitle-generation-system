@@ -95,6 +95,7 @@ def infer(texts: List[str], tokenizer, model, max_length, format: str = 'text', 
         tok = tokenizer(texts,
                         return_tensors="pt",
                         padding=True).input_ids.to(device)
+        model.to(device)
         result = model.generate(tok,
                                 max_length=max_length,
                                 max_time=10.,
