@@ -149,8 +149,8 @@ def handle_json_data(jsonpath, input='en', output='vi'):
 
       for id in data['vi'].keys():
         try:
-          english_caption.append(data['en'][id])
-          vietnamese_caption.append(data['vi'][id])
+          english_caption.append(data['en'][id].replace('\n', ' '))
+          vietnamese_caption.append(data['vi'][id].replace('\n', ' '))
         except:
           print('Error: ' + id)
 
