@@ -141,14 +141,20 @@ def handle_json_data(jsonpath, input='en', output='vi'):
     Returns:
         _type_: _description_
     """
-    with open(jsonpath, 'r', encoding="utf-8") as f:
-        data = json.load(f)
+    english_caption = list()
+    vietnamese_caption = list()
 
-    results = list()
-    for id in data['vi'].keys():
-        results.append([id, data[input][id], data[output][id]])
+    with open(jsonpath, 'r', encoding='utf-8') as f:
+      data = json.load(f)
 
-    return results
+      for id in data['vi'].keys():
+        try:
+          english_caption.append(data['en'][id])
+          vietnamese_caption.append(data['vi'][id])
+        except:
+          print('Error: ' + id)
+
+    return english_caption, vietnamese_caption
 
 
 def is_srt_format(string: str) -> bool:
