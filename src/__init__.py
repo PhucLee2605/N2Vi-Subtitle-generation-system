@@ -5,7 +5,7 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
     #for windows
-    os.environ['TRANSFORMERS_CACHE'] = 'D:/.cache/huggingface/hub'
+    # os.environ['TRANSFORMERS_CACHE'] = 'D:/.cache/huggingface/hub'
     from .views import views
     from .auth import auth
 
