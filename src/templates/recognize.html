@@ -5,18 +5,28 @@
 <section class="banner_main" xmlns="http://www.w3.org/1999/html">
     <div>
         <form action="/recognized" method="post" enctype="multipart/form-data" name="audio-recognition">
-            <input id="upload_audio" type="file" name="audio-file" accept=".mp3, .m4a, .mp4, .wav">
-            <p>Drag your audio file here or click in this area.</p>
+            <label for="upload_audio" hidden>Upload audio file</label>
+            <input id="upload_audio" onchange="displayFile(this)" type="file" name="audio-file" accept=".mp3, .m4a, .mp4, .wav">
+            <p id="none-file">Drag your audio file here or click in this area.</p>
+            <p id="uploaded-file" style="visibility:hidden"></p>
+            <a hidden>wait</a>
             <br>
             <div id="button_recognize">
                 <a id="recognize" class="start-bar" href="javascript:recognize('#upload_audio',
                                     '#reg-output',
                                     '#txtpath',
                                     '#xmlpath',
-                                    '#srtpath');">Recognized</a>
+                                    '#srtpath',
+                                    'en');">Recognize</a>
+                <a id="translate" class="start-bar" href="javascript:recognize('#upload_audio',
+                                    '#reg-output',
+                                    '#txtpath',
+                                    '#xmlpath',
+                                    '#srtpath',
+                                    'vi');">And Translate</a>
             </div>
             <div id="loading">
-                <img class="center" id="loading-image" src="{{ url_for('static', filename='loading.gif') }}">
+                <img class="center" id="loading-image" src="{{ url_for('static', filename='images/infinity.gif') }}">
             </div>
             <br>
             <textarea id="reg-output" name="audio-output" placeholder="Output script: " readonly></textarea>
@@ -33,6 +43,14 @@
 
 {% block jscode %}
 <script>
+    function displayFile(filePath) {
+        document.getElementById("none-file").style.visibility = "hidden";
+        document.getElementById("uploaded-file").style.visibility = "visible";
+        document.getElementById("uploaded-file").innerHTML = filePath.files[0].name;
+    }
+</script>
+
+<script>
     $(document).ready(function () {
     $(document).ajaxStart(function () {
         $("#loading").show();
@@ -40,13 +58,13 @@
     }).ajaxStop(function () {
         $("#loading").hide();
         $("#button_recognize").show();
-    });
+        });
 });
-    function recognize(sourceElem, destElem, txtId, xmlId, srtId) {
+    function recognize(sourceElem, destElem, txtId, xmlId, srtId, lang) {
             var audio = $(sourceElem).prop('files')[0];
             var formData = new FormData();
             formData.append('audio', audio)
-
+            formData.append('lang', lang)
             $.ajax({
                 url: '/recognized',
                 type: 'POST',

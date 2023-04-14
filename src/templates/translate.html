@@ -5,8 +5,10 @@
 <section class="banner_main" xmlns="http://www.w3.org/1999/html" onload="checkFileAPI();">
     <div>
         <form action="/translated" method="post" enctype="multipart/form-data" name="form-translation">
+            <label for="upload_file" hidden>Upload audio file</label>
             <input id="upload_file" onchange="readText(this)" type="file" name="file-script" accept=".txt, .xml, .srt">
-            <p>Drag your files here or click in this area.</p>
+            <p id="none-file">Drag your files here or click in this area.</p>
+            <p id="uploaded-file" style="visibility:hidden"></p>
             <br>
             <select style="width: 49%" id="lang">
                     <option value="en">English</option>
@@ -27,7 +29,7 @@
                                     '#lang');">Translate</a>
             </div>
             <div id="loading">
-                <img class="center" id="loading-image" src="{{ url_for('static', filename='loading.gif') }}">
+                <img class="center" id="loading-image" src="{{ url_for('static', filename='images/infinity.gif') }}">
             </div>
             <div>
                 <a id="txtpath">Download TXT</a>
@@ -97,7 +99,9 @@
      * display content using a basic HTML replacement
      */
     function displayContents(txt, filename) {
-
+        document.getElementById('uploaded-file').style.visibility = 'visible';
+        document.getElementById('uploaded-file').innerHTML = filename;
+        document.getElementById('none-file').style.visibility = 'hidden';
         document.getElementById('inNoteCon').value = txt;
         document.getElementById('file-name').value = filename;
          //display output in DOM

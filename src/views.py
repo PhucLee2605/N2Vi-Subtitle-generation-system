@@ -179,17 +179,24 @@ def run_recognition():
             enhance_speech, sr = ENHANCE_MODEL.infer(speech, sr)
             transcription = RECOGNIZE_MODEL.infer(enhance_speech, sr)
 
+            if request.form.get('lang') == 'vi':
+                lines = ['en: ' + line['text'] for line in transcription['chunks']]
+                predict = [p[4:] for p in TRANSLATE_MODEL.infer(lines, 'xml')]
+
+                for i in range(len(predict)):
+                    transcription['chunks'][i]['text'] = predict[i]
+
+                text_output = ' '.join(predict)
+
+
             txt_audio_output = f"{pretemp}/database/recognize/text/{audio_name}.txt"
-            util.create_dir(os.path.dirname(txt_audio_output))
 
             with open(txt_audio_output, 'w', encoding="utf-8") as f:
-                f.write(transcription['text'])
+                f.write(text_output)
 
             xml_audio_output = f'{pretemp}/database/recognize/xml/{audio_name}.xml'
             srt_audio_output = f'{pretemp}/database/recognize/srt/{audio_name}.srt'
 
-            util.create_dir(os.path.dirname(xml_audio_output))
-            util.create_dir(os.path.dirname(srt_audio_output))
 
             with open(xml_audio_output, 'w', encoding="utf-8") as f:
                 xml_data = postprocess.export_xml(transcription)
@@ -197,15 +204,13 @@ def run_recognition():
                 postprocess.xml_to_srt(xml_data, srt_audio_output)
 
             print(f'[INFO] Done audio recognition: audio-duration: {int(audio_duration)}s time-recog: {int(time.time() - start_recog_time)}s')
-            return jsonify({"text": transcription['text'],
+            return jsonify({"text": text_output,
                             "txt_href": f'/download/{txt_audio_output}',
                             "xml_href": f'/download/{xml_audio_output}',
                             "srt_href": f'/download/{srt_audio_output}'})
 
         else:
             return redirect('/recognize')
-
-
 # GET TRANSCRIPT
 
 @views.route('/tubescribe')
