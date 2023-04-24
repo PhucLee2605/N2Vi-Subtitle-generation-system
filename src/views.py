@@ -225,11 +225,13 @@ def get_transcribe():
         url = request.form['url']
         try:
             audio_name, typp = crawl.download_audio(url, 'src/database/tubescribe')
+            srt_output = f'{pretemp}/database/tubescribe/srt/{audio_name}.srt'
         except:
+            print('download Fail')
             return jsonify('Error when downloading from provided url'), 404
 
 
-
+        print(typp)
         if typp == 'mp4':
             audio_path = os.path.join(f'{pretemp}/database/tubescribe/audio', f'{audio_name}.mp4')
 
@@ -237,9 +239,17 @@ def get_transcribe():
             enhance_speech, _ = ENHANCE_MODEL.infer(speech, sr)
             transcription = RECOGNIZE_MODEL.infer(enhance_speech)
 
-
             lines = ['en: ' + line['text'] for line in transcription['chunks']]
             predict = TRANSLATE_MODEL.infer(lines, 'xml')
+
+            phrases = postprocess.process_long_text(predict)
+            with open(srt_output, 'w', encoding="utf-8") as f:
+                for index in range(len(predict)):
+                    f.write(f"{index + 1}\n")
+                    start_time = transcription['chunks'][index]['timestamp'][0] * 1000
+                    end_time = transcription['chunks'][index]['timestamp'][1] * 1000
+                    f.write(f"{postprocess.format_time(int(start_time))} --> {postprocess.format_time(int(end_time))}\n")
+                    f.write(f"{phrases[index][4:]}\n\n")
 
         else:
             xml_path = os.path.join(f'{pretemp}/database/tubescribe/xml', f'{audio_name} (en).xml')
@@ -253,16 +263,13 @@ def get_transcribe():
             ptags = ["en: " + tag.text.strip() for tag in tags]
             predict = [p[4:] for p in TRANSLATE_MODEL.infer(ptags, 'xml')]
 
-        phrases = postprocess.process_long_text(predict)
+            phrases = postprocess.process_long_text(predict)
 
-        srt_output = f'{pretemp}/database/tubescribe/srt/{audio_name}.srt'
-        with open(srt_output, 'w', encoding="utf-8") as f:
-            for index in range(len(predict)):
-                f.write(f"{index + 1}\n")
-                start_time = transcription['chunks'][index]['timestamp'][0] * 1000
-                end_time = transcription['chunks'][index]['timestamp'][1] * 1000
-                f.write(f"{postprocess.format_time(int(start_time))} --> {postprocess.format_time(int(end_time))}\n")
-                f.write(f"{phrases[index][4:]}\n\n")
+            for idex in range(len(phrases)):
+              tags[idex].text = phrases[idex]
+            
+            xml_data = ET.tostring(xml).decode("utf-8")
+            postprocess.xml_to_srt(xml_data, srt_output)
 
         return jsonify({"srt_href": f'/download/{srt_output}'})
 
