@@ -187,7 +187,8 @@ def run_recognition():
                     transcription['chunks'][i]['text'] = predict[i]
 
                 text_output = ' '.join(predict)
-
+            else:
+                text_output = ' '.join([line['text'] for line in transcription['chunks']])
 
             txt_audio_output = f"{pretemp}/database/recognize/text/{audio_name}.txt"
 
