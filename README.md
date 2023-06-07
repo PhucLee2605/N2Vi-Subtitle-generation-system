@@ -1,6 +1,6 @@
 # **Capstone-Project-SP23**
 
-This repo contains all source code of our capstone project about ***English to Vietnamese subtitle generation system***
+This repo contains all source code of our capstone project about ***English to Vietnamese subtitle generation system***. Full thesis can be found [here](https://docs.google.com/document/d/1vcdi5bFimkHJ-P4nTt5K9UV4IzjXvAxS8_9UbJAbvUw/edit?usp=sharing)
 
 ## **Contributors**
 
